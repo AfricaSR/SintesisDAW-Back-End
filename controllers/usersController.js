@@ -1,0 +1,224 @@
+'use strict'
+//Importar el model User junto con el módulo que lo controla
+const User = require('../models/User');
+const Sequelize = require('sequelize');
+
+//Encriptador de datos
+const bcrypt = require('bcrypt');
+var crypto = require("crypto");
+//const _ = require('lodash');
+
+//Envío de mails
+const nodemailer = require("nodemailer");
+
+//Servicio de autenticación de usuarios
+const serv = require('../services/auth');
+
+//Servicio de tokens con caducidad
+const jwt = require('jwt-simple');
+const moment = require('moment');
+
+//Variables globales
+require('dotenv/config');
+
+const op = Sequelize.Op;
+const operatorsAliases = {
+    $eq: op.eq,
+    $or: op.or,
+    $ne: op.ne
+}
+
+/*
+Primero busca en la base de datos que haya un usuario con el email proporcionado y que esté verificado
+Luego encripta los datos de la contraseña y los compara con los guardados en el usuario encontrado
+Si todo es correcto se deja acceder, sino lanza un error
+*/
+
+exports.login = (req, res) => {
+    User.findOne({
+            where: {
+                email: req.query.email,
+                verified: true
+            }
+        })
+        .then(user => {
+            if (user) {
+                if (bcrypt.compareSync(req.query.password, user.dataValues.password)) {
+                    res.send('Hola ' + user.name)
+                } else {
+                    res.send('Contraseña incorrecta')
+                }
+            } else {
+                res.send('El usuario no existe')
+            }
+
+        })
+        .catch(err => res.send(err));
+}
+
+//Crea un usuario en la base de datos, llamando a la función insertUser, si las contraseñas son iguales
+exports.create = (req, res) => {
+    if (req.query.password_1 == req.query.password_2) {
+        insertUser(req.query, res);
+    } else {
+        res.send('Las contraseñas no coinciden')
+    }
+
+}
+
+//Verifica que el token recibido esté vigente, luego que exista el usuario y finalmente actualiza que está verificado
+exports.verified = (req, res) => {
+    const token = req.query.id;
+    const payload = jwt.decode(token, process.env.SECRET_TOKEN)
+
+    if (payload.exp < moment().unix()) {
+        return res.status(401).send('El link ha expirado');
+    }
+
+    User.findOne({
+            where: {
+                email: payload.sub,
+                verified: false
+            }
+        })
+        .then(user => {
+            if (user) {
+                res.send('Hola ' + user.name + ', ya puedes autenticarte')
+                user.verified = true;
+                user.save()
+            } else {
+                res.send('El usuario no existe')
+            }
+
+        })
+        .catch(err => res.send(err));
+
+}
+
+/*Genera una nueva contraseña para el usuario y se la envía por correo
+Luego el usuario podrá personalizar una contraseña nueva desde la intranet
+*/
+exports.recovery = (req, res) => {
+
+    User.findOne({
+            where: {
+                email: req.query.email
+            }
+        })
+        .then(user => {
+            var id = crypto.randomBytes(8).toString('hex');
+
+            if (user) {
+                user.password = bcrypt.hashSync(id, 10);
+                user.verified = false;
+                user.save()
+                verifyEmail(user.email, 'recovery', id);
+            } else {
+                res.send('El usuario no existe')
+            }
+
+        })
+        .catch(err => res.send(err));
+
+}
+
+//Ayuda al usuario a recuperar su contraseña
+exports.renew = (req, res) => {
+
+    const token = req.query.id;
+
+    const payload = jwt.decode(token, process.env.SECRET_TOKEN)
+
+    if (payload.exp < moment().unix()) {
+        return res.status(401).send('El link ha expirado');
+    }
+
+    User.findOne({
+            where: {
+                email: payload.sub,
+                verified: false
+            }
+        })
+        .then(user => {
+            if (user) {
+                user.verified = true;
+                user.save()
+                res.send('Hola ' + user.name + ', ya puedes autenticarte')
+            } else {
+                res.send('El usuario no existe')
+            }
+
+        })
+        .catch(err => res.send(err));
+
+}
+
+/*Llama al modelo User y crea un usuario con los datos proporcionados, encriptando la contraseña
+Luego llama a la función verifyEmail para pasar al proceso de verificación
+Devuelve error si se viola la restricción de mails únicos
+*/
+function insertUser(data, res) {
+
+    User.create({
+            name: data.name,
+            surname: data.surname,
+            email: data.email,
+            dateBirth: new Date(data.year, data.month, data.day),
+            gender: data.gender,
+            password: bcrypt.hashSync(data.password_1, 10)
+        }).then((user) => {
+            verifyEmail(user.email, 'register', null);
+        })
+        .catch(err => {
+            if (err.name == 'SequelizeUniqueConstraintError') {
+                res.send('Ya hay un usuario registrado con esta dirección de correo')
+            } else {
+                res.send(err.name);
+            }
+
+        })
+}
+
+
+//Genera un token con el mail del usuario y se lo envía al mismo
+async function verifyEmail(mail, subject, id) {
+
+    var emailToken = serv.verifyMail(mail)
+
+    let transporter = nodemailer.createTransport({
+        host: process.env.GMAIL_SERVICE_HOST,
+        port: 587,
+        secure: false,
+        auth: {
+            user: process.env.GMAIL_USER_NAME,
+            pass: process.env.GMAIL_USER_PASSWORD
+        }
+    });
+
+    let link;
+    let info;
+    switch (subject) {
+        case 'register':
+            link = process.env.DB_HOST + ":" + process.env.PORT + "/create-account/verify/?id=" + emailToken;
+            info = ({
+                from: '"test" <test@venelac.es>',
+                to: mail,
+                subject: "Verificación de correo",
+                text: "Bienvenid@ a Eventic!",
+                html: "Hola,<br> Para finalizar tu registro, haz Click en el siguiente <br><a href=http://" + link + ">Enlace</a>"
+            });
+            break;
+        case 'recovery':
+            link = process.env.DB_HOST + ":" + process.env.PORT + "/recovery/renew/?id=" + emailToken;
+
+            info = ({
+                from: '"test" <test@venelac.es>',
+                to: mail,
+                subject: "Recuperación de cuenta",
+                html: "Hola, tu nueva contraseña es la siguiente: <br> " + id + " <br>Para acceder, haz Click en el siguiente <br><a href=http://" + link + ">Enlace</a> <br> Te recomendamos que <b>cambies</b> la contraseña una vez hasyas inicado sesión"
+            });
+            break;
+    }
+    let send = await transporter.sendMail(info);
+
+}
