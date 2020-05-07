@@ -2,8 +2,9 @@ const express = require('express');
 const exphbs = require('express-handlebars');
 const bodyParser = require('body-parser');
 const path = require('path');
+const cors = require('cors');
 require('dotenv/config');
-//process.env.DB...
+
 
 const db = require('./db/config');
 
@@ -16,7 +17,7 @@ require('./routes/signInRoute')(app);
 require('./routes/signUpRoute')(app);
 require('./routes/recoveryPassRoute')(app);
 
-
+app.use(cors({ origin: 'http://localhost:4200' }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.listen(process.env.PORT, console.log(process.env.PORT))

@@ -44,12 +44,12 @@ exports.login = (req, res) => {
         .then(user => {
             if (user) {
                 if (bcrypt.compareSync(req.query.password, user.dataValues.password)) {
-                    res.send('Hola ' + user.name)
+                    res.status(200).json({ msg: 'Hola ' + user.name })
                 } else {
-                    res.send('Contraseña incorrecta')
+                    res.json({ error: 'La contraseña no es correcta' })
                 }
             } else {
-                res.send('El usuario no existe')
+                res.json({ error: 'El usuario no existe' })
             }
 
         })
@@ -61,7 +61,7 @@ exports.create = (req, res) => {
     if (req.query.password_1 == req.query.password_2) {
         insertUser(req.query, res);
     } else {
-        res.send('Las contraseñas no coinciden')
+        res.json({ error: 'Las contraseñas no coinciden' })
     }
 
 }
@@ -72,7 +72,7 @@ exports.verified = (req, res) => {
     const payload = jwt.decode(token, process.env.SECRET_TOKEN)
 
     if (payload.exp < moment().unix()) {
-        return res.status(401).send('El link ha expirado');
+        return res.status(401).json({ error: 'El Link ha expirado' })
     }
 
     User.findOne({
@@ -83,11 +83,11 @@ exports.verified = (req, res) => {
         })
         .then(user => {
             if (user) {
-                res.send('Hola ' + user.name + ', ya puedes autenticarte')
+                res.status(200).json({ msg: 'Hola ' + user.name + ', ya puedes autenticarte' })
                 user.verified = true;
                 user.save()
             } else {
-                res.send('El usuario no existe')
+                res.json({ error: 'El usuario no existe' })
             }
 
         })
@@ -114,7 +114,7 @@ exports.recovery = (req, res) => {
                 user.save()
                 verifyEmail(user.email, 'recovery', id);
             } else {
-                res.send('El usuario no existe')
+                res.json({ error: 'El usuario no existe' })
             }
 
         })
@@ -130,7 +130,7 @@ exports.renew = (req, res) => {
     const payload = jwt.decode(token, process.env.SECRET_TOKEN)
 
     if (payload.exp < moment().unix()) {
-        return res.status(401).send('El link ha expirado');
+        return res.status(401).json({ error: 'El Link ha expirado' })
     }
 
     User.findOne({
@@ -143,9 +143,9 @@ exports.renew = (req, res) => {
             if (user) {
                 user.verified = true;
                 user.save()
-                res.send('Hola ' + user.name + ', ya puedes autenticarte')
+                res.status(200).json({ msg: 'Hola ' + user.name + ', ya puedes autenticarte' })
             } else {
-                res.send('El usuario no existe')
+                res.json({ error: 'El usuario no existe' })
             }
 
         })
@@ -171,9 +171,9 @@ function insertUser(data, res) {
         })
         .catch(err => {
             if (err.name == 'SequelizeUniqueConstraintError') {
-                res.send('Ya hay un usuario registrado con esta dirección de correo')
+                res.json({ error: 'Ya hay un usuario registrado con esa dirección de correo' })
             } else {
-                res.send(err.name);
+                res.json({ error: err.name })
             }
 
         })
