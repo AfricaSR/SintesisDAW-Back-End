@@ -12,12 +12,13 @@ db.authenticate()
     .catch(err => console.log(err))
 
 const app = express();
-
+app.use(cors({ origin: 'http://localhost:4200' }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 require('./routes/signInRoute')(app);
 require('./routes/signUpRoute')(app);
 require('./routes/recoveryPassRoute')(app);
 
-app.use(cors({ origin: 'http://localhost:4200' }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+
+
 app.listen(process.env.PORT, console.log(process.env.PORT))
