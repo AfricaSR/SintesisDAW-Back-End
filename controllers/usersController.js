@@ -44,7 +44,7 @@ exports.login = (req, res) => {
         .then(user => {
             if (user) {
                 if (bcrypt.compareSync(req.body.password, user.dataValues.password)) {
-                    res.status(200).json({ msg: 'Hola ' + user.name })
+                    res.status(200).json({ msg: 'Hola ' + user.name, token: serv.loginUser(user.idUser) })
                 } else {
                     res.json({ error: 'La contraseña no es correcta' })
                 }

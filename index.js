@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 require('./routes/signInRoute')(app);
 require('./routes/signUpRoute')(app);
 require('./routes/recoveryPassRoute')(app);
-
+require('./routes/homeRoute')(app);
 
 
 app.listen(process.env.PORT, console.log(process.env.PORT))
