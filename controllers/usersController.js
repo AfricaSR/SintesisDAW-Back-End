@@ -37,13 +37,13 @@ Si todo es correcto se deja acceder, sino lanza un error
 exports.login = (req, res) => {
     User.findOne({
             where: {
-                email: req.query.email,
+                email: req.body.email,
                 verified: true
             }
         })
         .then(user => {
             if (user) {
-                if (bcrypt.compareSync(req.query.password, user.dataValues.password)) {
+                if (bcrypt.compareSync(req.body.password, user.dataValues.password)) {
                     res.status(200).json({ msg: 'Hola ' + user.name })
                 } else {
                     res.json({ error: 'La contraseña no es correcta' })
@@ -53,13 +53,13 @@ exports.login = (req, res) => {
             }
 
         })
-        .catch(err => res.send(err));
+        .catch(err => res.json({ error: 'El usuario no existe' }));
 }
 
 //Crea un usuario en la base de datos, llamando a la función insertUser, si las contraseñas son iguales
 exports.create = (req, res) => {
-    if (req.query.password_1 == req.query.password_2) {
-        insertUser(req.query, res);
+    if (req.body.password_1 == req.body.password_2) {
+        insertUser(req.body, res);
     } else {
         res.json({ error: 'Las contraseñas no coinciden' })
     }
@@ -83,7 +83,7 @@ exports.verified = (req, res) => {
         })
         .then(user => {
             if (user) {
-                res.status(200).json({ msg: 'Hola ' + user.name + ', ya puedes autenticarte' })
+                res.status(200).json({ msg: 'Hola ' + user.name + ', ya puedes autenticarte' });
                 user.verified = true;
                 user.save()
             } else {
@@ -91,7 +91,7 @@ exports.verified = (req, res) => {
             }
 
         })
-        .catch(err => res.send(err));
+        .catch(err => res.json({ error: 'El usuario no existe' }));
 
 }
 
@@ -102,7 +102,7 @@ exports.recovery = (req, res) => {
 
     User.findOne({
             where: {
-                email: req.query.email
+                email: req.body.email
             }
         })
         .then(user => {
@@ -111,7 +111,8 @@ exports.recovery = (req, res) => {
             if (user) {
                 user.password = bcrypt.hashSync(id, 10);
                 user.verified = false;
-                user.save()
+                user.save();
+                res.json({ msg: 'Hemos enviado un mensaje de renovación al correo ' + req.body.email });
                 verifyEmail(user.email, 'recovery', id);
             } else {
                 res.json({ error: 'El usuario no existe' })
@@ -168,6 +169,7 @@ function insertUser(data, res) {
             password: bcrypt.hashSync(data.password_1, 10)
         }).then((user) => {
             verifyEmail(user.email, 'register', null);
+            res.json({ msg: data.name + ', para completar tu registro revisa tu buzón de correo' })
         })
         .catch(err => {
             if (err.name == 'SequelizeUniqueConstraintError') {
@@ -215,7 +217,7 @@ async function verifyEmail(mail, subject, id) {
                 from: '"test" <test@venelac.es>',
                 to: mail,
                 subject: "Recuperación de cuenta",
-                html: "Hola, tu nueva contraseña es la siguiente: <br> " + id + " <br>Para acceder, haz Click en el siguiente <br><a href=http://" + link + ">Enlace</a> <br> Te recomendamos que <b>cambies</b> la contraseña una vez hasyas inicado sesión"
+                html: "Hola, tu nueva contraseña es la siguiente: <br> " + id + " <br>Para acceder, haz Click en el siguiente <br><a href=http://" + link + ">Enlace</a> <br> Te recomendamos que <b>cambies</b> la contraseña una vez hayas inicado sesión"
             });
             break;
     }
