@@ -1,6 +1,7 @@
 'use strict'
 //Importar el model User junto con el módulo que lo controla
 const User = require('../models/User');
+const Wellness = require('../models/Wellness');
 const Sequelize = require('sequelize');
 
 //Encriptador de datos
@@ -92,7 +93,7 @@ exports.logout = (req, res) => {
 }
 
 exports.verifyAuth = (req, res) => {
-    console.log(req)
+
     const token = req.body.token;
     const payload = jwt.decode(token, process.env.SECRET_TOKEN)
 
@@ -117,4 +118,13 @@ exports.verifyAuth = (req, res) => {
         })
         .catch(err => res.json({ error: 'El usuario no existe' }));
 
+}
+
+exports.wellnessList = (req, res) => {
+
+    Wellness.findAll()
+        .then(wellnessList => {
+            res.status(200).json({ wellnessList })
+        })
+        .catch(err => res.json({ error: 'Ha ocurrido un error' }));
 }

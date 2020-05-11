@@ -11,6 +11,7 @@ module.exports = function(app) {
     app.post('/my-events', verifyToken.verifyLogin, Controller.myEvents)
     app.post('/my-invitations', verifyToken.verifyLogin, Controller.myInvitations)
     app.post('/wellness', verifyToken.verifyLogin, Controller.wellness)
+    app.get('/wellness/list', Controller.wellnessList)
     app.post('/logout', verifyToken.verifyLogin, Controller.logout)
 
 }
