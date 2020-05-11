@@ -35,6 +35,7 @@ Si todo es correcto se deja acceder, sino lanza un error
 */
 
 exports.login = (req, res) => {
+
     User.findOne({
             where: {
                 email: req.body.email,
@@ -44,7 +45,8 @@ exports.login = (req, res) => {
         .then(user => {
             if (user) {
                 if (bcrypt.compareSync(req.body.password, user.dataValues.password)) {
-                    res.status(200).json({ msg: 'Hola ' + user.name, token: serv.loginUser(user.idUser) })
+                    let token = serv.loginUser(user.idUser);
+                    res.status(200).json({ msg: 'Hola ' + user.name, token: token })
                 } else {
                     res.json({ error: 'La contraseña no es correcta' })
                 }
@@ -53,7 +55,7 @@ exports.login = (req, res) => {
             }
 
         })
-        .catch(err => res.json({ error: 'El usuario no existe' }));
+        .catch(err => res.json({ error: 'Ha ocurrido un error' }));
 }
 
 //Crea un usuario en la base de datos, llamando a la función insertUser, si las contraseñas son iguales
