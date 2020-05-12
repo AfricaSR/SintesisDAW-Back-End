@@ -29,13 +29,6 @@ exports.home = (req, res, next) => {
 
 }
 
-//Accede a los ajustes de cuenta del usuario
-exports.account = (req, res) => {
-
-    res.status(200).json({ token: req.body.token })
-
-}
-
 //Accede al servicio de canjeo de invitaciones
 exports.exchange = (req, res) => {
 
@@ -65,20 +58,6 @@ exports.create = (req, res) => {
 }
 
 //Accede a los eventos propidos que se han generado como usuario
-exports.myEvents = (req, res) => {
-
-    res.status(200).json({ token: req.body.token })
-
-}
-
-//Accede a los eventos propidos que se han generado como usuario
-exports.myInvitations = (req, res) => {
-
-    res.status(200).json({ token: req.body.token })
-
-}
-
-//Accede a los eventos propidos que se han generado como usuario
 exports.wellness = (req, res) => {
 
     res.status(200).json({ token: req.body.token })
@@ -94,8 +73,8 @@ exports.logout = (req, res) => {
 
 exports.verifyAuth = (req, res) => {
 
-    const token = req.body.token;
-    const payload = jwt.decode(token, process.env.SECRET_TOKEN)
+    let token = req.body.token;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
 
     if (payload.exp < moment().unix()) {
         return res.status(401).json({ error: 'El Link ha expirado' })
@@ -120,9 +99,26 @@ exports.verifyAuth = (req, res) => {
 
 }
 
-exports.wellnessList = (req, res) => {
+exports.wellnessAList = (req, res) => {
 
-    Wellness.findAll()
+    Wellness.findAll({
+            where: {
+                type: 'Alérgenos'
+            }
+        })
+        .then(wellnessList => {
+            res.status(200).json({ wellnessList })
+        })
+        .catch(err => res.json({ error: 'Ha ocurrido un error' }));
+}
+
+exports.wellnessDList = (req, res) => {
+
+    Wellness.findAll({
+            where: {
+                type: 'Diversidad'
+            }
+        })
         .then(wellnessList => {
             res.status(200).json({ wellnessList })
         })

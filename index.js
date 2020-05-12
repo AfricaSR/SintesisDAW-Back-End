@@ -19,6 +19,6 @@ require('./routes/signInRoute')(app);
 require('./routes/signUpRoute')(app);
 require('./routes/recoveryPassRoute')(app);
 require('./routes/homeRoute')(app);
-
+require('./routes/profileRoute')(app);
 
 app.listen(process.env.PORT, console.log(process.env.PORT))

@@ -70,8 +70,8 @@ exports.create = (req, res) => {
 
 //Verifica que el token recibido esté vigente, luego que exista el usuario y finalmente actualiza que está verificado
 exports.verified = (req, res) => {
-    const token = req.query.id;
-    const payload = jwt.decode(token, process.env.SECRET_TOKEN)
+    let token = req.query.id;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
 
     if (payload.exp < moment().unix()) {
         return res.status(401).json({ error: 'El Link ha expirado' })
@@ -128,9 +128,9 @@ exports.recovery = (req, res) => {
 //Ayuda al usuario a recuperar su contraseña
 exports.renew = (req, res) => {
 
-    const token = req.query.id;
+    let token = req.query.id;
 
-    const payload = jwt.decode(token, process.env.SECRET_TOKEN)
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
 
     if (payload.exp < moment().unix()) {
         return res.status(401).json({ error: 'El Link ha expirado' })

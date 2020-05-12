@@ -43,6 +43,13 @@ module.exports = db.define('user', {
         },
         allowNull: false
     },
+    photo: {
+        type: Sequelize.STRING,
+        validate: {
+            len: [0, 255]
+        },
+        allowNull: true
+    },
     password: {
         type: Sequelize.STRING,
         validate: {
