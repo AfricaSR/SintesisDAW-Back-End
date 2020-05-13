@@ -58,13 +58,6 @@ exports.create = (req, res) => {
 }
 
 //Accede a los eventos propidos que se han generado como usuario
-exports.wellness = (req, res) => {
-
-    res.status(200).json({ token: req.body.token })
-
-}
-
-//Accede a los eventos propidos que se han generado como usuario
 exports.logout = (req, res) => {
 
     res.status(200).json({ token: req.body.token })
@@ -97,30 +90,4 @@ exports.verifyAuth = (req, res) => {
         })
         .catch(err => res.json({ error: 'El usuario no existe' }));
 
-}
-
-exports.wellnessAList = (req, res) => {
-
-    Wellness.findAll({
-            where: {
-                type: 'Alérgenos'
-            }
-        })
-        .then(wellnessList => {
-            res.status(200).json({ wellnessList })
-        })
-        .catch(err => res.json({ error: 'Ha ocurrido un error' }));
-}
-
-exports.wellnessDList = (req, res) => {
-
-    Wellness.findAll({
-            where: {
-                type: 'Diversidad'
-            }
-        })
-        .then(wellnessList => {
-            res.status(200).json({ wellnessList })
-        })
-        .catch(err => res.json({ error: 'Ha ocurrido un error' }));
 }

@@ -7,9 +7,6 @@ module.exports = function(app) {
     app.post('/events', verifyToken.verifyLogin, Controller.events)
     app.post('/notifications', verifyToken.verifyLogin, Controller.notifications)
     app.post('/create', verifyToken.verifyLogin, Controller.create)
-    app.post('/wellness', verifyToken.verifyLogin, Controller.wellness)
-    app.get('/wellness/alergenics', Controller.wellnessAList)
-    app.get('/wellness/diversity', Controller.wellnessDList)
     app.post('/logout', verifyToken.verifyLogin, Controller.logout)
 
 }

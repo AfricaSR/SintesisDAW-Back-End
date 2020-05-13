@@ -32,6 +32,13 @@ module.exports = db.define('wellness', {
         },
         allowNull: false
     },
+    file: {
+        type: Sequelize.STRING,
+        validate: {
+            len: [0, 255]
+        },
+        allowNull: false
+    },
     createdAt: {
         type: Sequelize.DATE,
         allowNull: false
