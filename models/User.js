@@ -1,9 +1,9 @@
-const Sequelize = require('sequelize');
-const db = require('../db/config');
+const DataTypes = require('sequelize');
+const sequelize = require('../db/config');
 
-module.exports = db.define('user', {
+module.exports = sequelize.define("User", {
     idUser: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         validate: {
@@ -12,61 +12,53 @@ module.exports = db.define('user', {
         allowNull: false
     },
     name: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         validate: {
             len: [0, 50]
         },
         allowNull: false
     },
     surname: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         validate: {
             len: [0, 100]
         },
         allowNull: false
     },
     email: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         validate: {
             len: [0, 100]
         },
         allowNull: false
     },
     dateBirth: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         allowNull: false
     },
     gender: {
-        type: Sequelize.CHAR,
+        type: DataTypes.CHAR,
         validate: {
             len: [0, 1]
         },
         allowNull: false
     },
     photo: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         validate: {
             len: [0, 255]
         },
         allowNull: true
     },
     password: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         validate: {
             len: [0, 255]
         },
         allowNull: false
     },
-    createdAt: {
-        type: Sequelize.DATE,
-        allowNull: false
-    },
     verified: {
-        type: Sequelize.BOOLEAN,
+        type: DataTypes.BOOLEAN,
         defaultValue: false
-    },
-    updatedAt: {
-        type: Sequelize.DATE
     }
-
-})
+});

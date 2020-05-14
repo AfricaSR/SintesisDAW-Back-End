@@ -2,7 +2,7 @@
 //Importar el model User junto con el módulo que lo controla
 const User = require('../models/User');
 const Wellness = require('../models/Wellness');
-var UW = require('../models/userWellness');
+
 const Sequelize = require('sequelize');
 
 //Encriptador de datos
@@ -34,21 +34,6 @@ exports.userWellness = (req, res) => {
     }
 
 
-    UW.findOne({ idUser: id },
-        function(err, uw) {
-            if (!uw) {
-
-                UW.create({
-                    idUser: id,
-                    wellness: new Array()
-                })
-                return res.status(200).json(uw);
-            } else {
-                return res.status(200).json(uw);
-            }
-
-        }
-    );
 
 
 }
@@ -89,16 +74,6 @@ exports.updateWellness = (req, res) => {
     }
 
 
-    UW.findOneAndUpdate({ idUser: id }, { $push: { "wellness": req.body.wellness } },
-        function(err, uw) {
-            if (err) {
-                return res.status(500).json(err);
-            } else {
-                return res.status(200).json(uw);
-            }
-
-        }
-    );
 
 
 }

@@ -1,9 +1,8 @@
-const Sequelize = require('sequelize');
-const db = require('../db/config');
-
-module.exports = db.define('wellness', {
+const DataTypes = require('sequelize');
+const sequelize = require('../db/config');
+module.exports = sequelize.define("Wellness", {
     idWellness: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         validate: {
@@ -12,39 +11,31 @@ module.exports = db.define('wellness', {
         allowNull: false
     },
     type: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         validate: {
             len: [0, 50]
         },
         allowNull: false
     },
     name: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         validate: {
             len: [0, 100]
         },
         allowNull: false
     },
     description: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         validate: {
             len: [0, 255]
         },
         allowNull: false
     },
     file: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         validate: {
             len: [0, 255]
         },
         allowNull: false
-    },
-    createdAt: {
-        type: Sequelize.DATE,
-        allowNull: false
-    },
-    updatedAt: {
-        type: Sequelize.DATE
     }
-
 })

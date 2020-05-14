@@ -19,10 +19,7 @@ mongoose.connect(process.env.MONGO_CONNECTION +
 );
 
 // Configuracion para acceder a la base de datos en MySQL
-const db = require('./db/config');
-
-db.authenticate()
-    .catch(err => console.log(err))
+const db = require('./models/db');
 
 const app = express();
 app.use(cors({ origin: 'http://localhost:4200' }));
@@ -35,4 +32,6 @@ require('./routes/homeRoute')(app);
 require('./routes/profileRoute')(app);
 require('./routes/wellnessRoute')(app);
 
-app.listen(process.env.PORT, console.log(process.env.PORT))
+app.listen(process.env.PORT, () => {
+    db.main();
+})
