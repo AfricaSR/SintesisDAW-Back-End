@@ -33,10 +33,6 @@ module.exports = sequelize.define("Event", {
         type: DataTypes.DATE,
         allowNull: false
     },
-    hour: {
-        type: DataTypes.TIME,
-        allowNull: false
-    },
     location: {
         type: DataTypes.STRING,
         validate: {

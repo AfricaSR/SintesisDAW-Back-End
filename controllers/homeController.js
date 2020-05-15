@@ -36,12 +36,6 @@ exports.exchange = (req, res) => {
 
 }
 
-//Accede a los eventos propidos que se han generado como usuario
-exports.events = (req, res) => {
-
-    res.status(200).json({ token: req.body.token })
-
-}
 
 //Accede a los eventos propidos que se han generado como usuario
 exports.notifications = (req, res) => {
@@ -50,12 +44,7 @@ exports.notifications = (req, res) => {
 
 }
 
-//Accede a los eventos propidos que se han generado como usuario
-exports.create = (req, res) => {
 
-    res.status(200).json({ token: req.body.token })
-
-}
 
 //Accede a los eventos propidos que se han generado como usuario
 exports.logout = (req, res) => {

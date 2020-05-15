@@ -39,9 +39,32 @@ exports.main = async() => {
         foreignKey: 'host',
         targetKey: 'idUser'
     });
+    /*
+        User.belongsToMany(Event, { through: "Attend" });
+        Event.belongsToMany(User, { through: "Attend" });
+    */
+    User.belongsToMany(Event, {
+        through: {
+            model: Attend,
+            unique: false,
+            foreignKey: 'EventIdEvent',
+        },
 
-    User.belongsToMany(Event, { through: "Attend" });
-    Event.belongsToMany(User, { through: "Attend" });
+        unique: false,
+        otherKey: 'EventIdEvent'
+    });
+
+    Event.belongsToMany(User, {
+        through: {
+            model: Attend,
+            unique: false,
+            foreignKey: 'UserIdUser',
+        },
+
+        unique: false,
+        otherKey: 'UserIdUser'
+
+    });
 
     await sequelize.sync({ force: false });
 
