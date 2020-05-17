@@ -136,3 +136,50 @@ exports.deleteEvent = (req, res) => {
 
 
 }
+
+exports.createInvitation = (req, res) => {
+
+    let token = req.body.token;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
+
+    if (payload.exp < moment().unix()) {
+        return res.status(401).json({ error: 'El Link ha expirado' })
+    }
+
+    Event_Invitations.findOneAndUpdate({
+            idEvent: req.body.idEvent
+        }, { $push: { "invitations": req.body.invitation } },
+        (err, ei) => {
+            if (ei) {
+                ei.invitations.push(req.body.invitation)
+                res.json(ei);
+            } else {
+                res.json(err);
+            }
+        }
+
+    );
+
+
+}
+
+exports.getEventInvitations = (req, res) => {
+
+    let token = req.body.token;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
+
+    if (payload.exp < moment().unix()) {
+        return res.status(401).json({ error: 'El Link ha expirado' })
+    }
+
+    Event_Invitations.find({
+        idEvent: req.body.idEvent
+    }), (err, ei) => {
+        if (ei) {
+            res.json(ei);
+        } else {
+            res.json(err);
+        }
+    }
+
+}

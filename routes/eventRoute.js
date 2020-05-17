@@ -3,6 +3,8 @@ var verifyToken = require('../middlewares/verifyToken');
 module.exports = function(app) {
 
     app.post('/eventListCreated', verifyToken.verifyLogin, Controller.eventListCreated)
+    app.post('/createInvitation', verifyToken.verifyLogin, Controller.createInvitation)
+    app.post('/getEventInvitations', verifyToken.verifyLogin, Controller.getEventInvitations)
     app.get('/myInvitations', verifyToken.verifyLogin, Controller.myInvitations)
     app.post('/eventCreated', verifyToken.verifyLogin, Controller.eventCreated)
     app.get('/myInvitation/:id', verifyToken.verifyLogin, Controller.myInvitation)

@@ -14,7 +14,8 @@ mongoose.connect(process.env.MONGO_CONNECTION +
     process.env.MONGO_PORT + '/' +
     process.env.MONGO_DB, {
         useNewUrlParser: true,
-        useUnifiedTopology: true
+        useUnifiedTopology: true,
+        useFindAndModify: false
     }
 );
 
