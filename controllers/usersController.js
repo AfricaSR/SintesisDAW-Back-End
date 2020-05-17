@@ -190,12 +190,12 @@ async function verifyEmail(mail, subject, id) {
     var emailToken = serv.verifyMail(mail)
 
     let transporter = nodemailer.createTransport({
-        host: process.env.GMAIL_SERVICE_HOST,
+        host: process.env.EMAIL_SERVICE_HOST,
         port: 587,
         secure: false,
         auth: {
-            user: process.env.GMAIL_USER_NAME,
-            pass: process.env.GMAIL_USER_PASSWORD
+            user: process.env.EMAIL_USER_NAME,
+            pass: process.env.EMAIL_USER_PASSWORD
         }
     });
 
@@ -205,7 +205,7 @@ async function verifyEmail(mail, subject, id) {
         case 'register':
             link = process.env.DB_HOST + ":" + process.env.PORT + "/create-account/verify/?id=" + emailToken;
             info = ({
-                from: '"test" <test@venelac.es>',
+                from: '"Comunicación" <info@evenfy.es>',
                 to: mail,
                 subject: "Verificación de correo",
                 text: "Bienvenid@ a Eventic!",
@@ -216,7 +216,7 @@ async function verifyEmail(mail, subject, id) {
             link = process.env.DB_HOST + ":" + process.env.PORT + "/recovery/renew/?id=" + emailToken;
 
             info = ({
-                from: '"test" <test@venelac.es>',
+                from: '"Comunicación" <info@evenfy.es>',
                 to: mail,
                 subject: "Recuperación de cuenta",
                 html: "Hola, tu nueva contraseña es la siguiente: <br> " + id + " <br>Para acceder, haz Click en el siguiente <br><a href=http://" + link + ">Enlace</a> <br> Te recomendamos que <b>cambies</b> la contraseña una vez hayas inicado sesión"
