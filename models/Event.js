@@ -29,6 +29,13 @@ module.exports = sequelize.define("Event", {
         type: DataTypes.TEXT,
         allowNull: true
     },
+    code: {
+        type: DataTypes.STRING,
+        validate: {
+            len: [0, 6]
+        },
+        allowNull: false
+    },
     date: {
         type: DataTypes.DATE,
         allowNull: false

@@ -6,6 +6,7 @@ const Invitation = new Schema({
     surname: String,
     code: String,
     confirmed: Boolean,
+    member: Boolean,
     alergenics: [String],
     functionality: [String],
     Responses: [String]

@@ -33,6 +33,7 @@ require('./routes/homeRoute')(app);
 require('./routes/profileRoute')(app);
 require('./routes/wellnessRoute')(app);
 require('./routes/eventRoute')(app);
+require('./routes/attendeesRoute')(app);
 
 app.listen(process.env.PORT, () => {
     db.main();
