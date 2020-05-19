@@ -6,6 +6,7 @@ const Event = require('../models/Event');
 const Event_Invitations = require('../models/Invitation');
 const Invitation = require('../models/Invitation');
 const Attend = require('../models/Attendees');
+const User_Wellness = require('../models/User_Wellness');
 const Sequelize = require('sequelize');
 
 //Encriptador de datos
@@ -42,16 +43,50 @@ exports.createAttend = (req, res) => {
         role: req.body.role,
         confirmationCode: req.body.confirmationCode
     }).then(async(attend) => {
-        await Event_Invitations.findOneAndUpdate({
-            idEvent: req.body.event,
-            'invitations.code': req.body.confirmationCode
-        }, {
-            $set: {
-                'invitations.$.member': true,
+        await User_Wellness.findAll({
+            where: {
+                UserIdUser: id
             }
-        });
 
-        return res.status(200).json({ msg: "Bienveni@ al Evento" })
+        }).then(async(uw) => {
+
+            let wl = new Array();
+            uw.forEach(e => {
+                wl.push(e.dataValues.WellnessIdWellness)
+            });
+            let al = new Array();
+            let fl = new Array();
+
+            await Wellness.findAll()
+                .then(async(wellnessList) => {
+
+                    wellnessList.forEach(e => {
+                        if (wl.includes(e.dataValues.idWellness) && e.dataValues.type == 'Alérgenos') {
+                            al.push(e.name)
+                        } else if (wl.includes(e.dataValues.idWellness) && e.dataValues.type == 'Diversidad') {
+                            fl.push(e.name)
+                        }
+                    })
+
+                    await Event_Invitations.findOneAndUpdate({
+                        idEvent: req.body.event,
+                        'invitations.code': req.body.confirmationCode
+                    }, {
+                        $set: {
+                            'invitations.$.member': true,
+                            'invitations.$.alergenics': al,
+                            'invitations.$.functionality': fl
+                        }
+                    });
+
+                    return res.status(200).json({ msg: "Bienveni@ al Evento" })
+                })
+                .catch(err => res.json({ error: 'Ha ocurrido un error' }));
+
+
+
+        }).catch(err => res.json({ error: 'Ha ocurrido un error' }));
+
     }).catch(err => { return res.status(500).json({ error: err }) })
 
 

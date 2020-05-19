@@ -31,18 +31,13 @@ exports.main = async() => {
         otherKey: 'UserIdUser'
 
     });
-    /*
-        User.belongsToMany(Wellness, { through: User_Wellness, as: "User", unique: false });
-        Wellness.belongsToMany(User, { through: User_Wellness, as: "Wellness", unique: false });*/
+
 
     Event.belongsTo(User, {
         foreignKey: 'host',
         targetKey: 'idUser'
     });
-    /*
-        User.belongsToMany(Event, { through: "Attend" });
-        Event.belongsToMany(User, { through: "Attend" });
-    */
+
     User.belongsToMany(Event, {
         through: {
             model: Attend,
@@ -65,6 +60,7 @@ exports.main = async() => {
         otherKey: 'UserIdUser'
 
     });
+
 
     await sequelize.sync({ force: false });
 

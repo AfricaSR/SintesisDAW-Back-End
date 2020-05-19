@@ -25,5 +25,8 @@ module.exports = sequelize.define("Attend", {
             len: [0, 50]
         },
         allowNull: false
+    },
+    confirmed: {
+        type: DataTypes.BOOLEAN
     }
 });

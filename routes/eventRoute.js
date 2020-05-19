@@ -15,5 +15,9 @@ module.exports = function(app) {
     app.post('/createEvent', verifyToken.verifyLogin, Controller.createEvent)
     app.put('/editEvent/:id', verifyToken.verifyLogin, Controller.editEvent)
     app.delete('/deleteEvent/:id', verifyToken.verifyLogin, Controller.deleteEvent)
+    app.post('/makeQuestion', verifyToken.verifyLogin, Controller.makeQuestion)
+    app.post('/getQuestions', verifyToken.verifyLogin, Controller.getQuestions)
+    app.post('/makeNews', verifyToken.verifyLogin, Controller.makeNews)
+    app.post('/getNews', verifyToken.verifyLogin, Controller.getNews)
 
 }

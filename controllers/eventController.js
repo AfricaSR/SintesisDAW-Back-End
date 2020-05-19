@@ -5,6 +5,8 @@ const Wellness = require('../models/Wellness');
 const Event = require('../models/Event');
 const Event_Invitations = require('../models/Invitation');
 const Invitation = require('../models/Invitation');
+const Question = require('../models/Question')
+const News = require('../models/News')
 const Sequelize = require('sequelize');
 
 //Encriptador de datos
@@ -144,7 +146,17 @@ exports.createEvent = (req, res) => {
         closed: req.body.event.closed,
     }).then(event => {
         Event_Invitations.create({
-            idEvent: event.idEvent
+            idEvent: event.idEvent,
+            invitations: new Array()
+        })
+        Question.create({
+            idEvent: event.idEvent,
+            questions: new Array()
+        })
+
+        News.create({
+            idEvent: event.idEvent,
+            News: new Array()
         })
 
         return res.status(200).json({ msg: "Evento creado correctamente" })
@@ -306,5 +318,98 @@ exports.getEventInvitation = (req, res) => {
             res.status(200).json({ error: 'Evento no encontrado' });
         }
     }).catch(err => res.status(500).send(err))
+
+}
+
+exports.makeQuestion = (req, res) => {
+
+
+    let token = req.body.token;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
+
+    if (payload.exp < moment().unix()) {
+        return res.status(401).json({ error: 'El Link ha expirado' })
+    }
+
+    Question.findOneAndUpdate({
+            idEvent: req.body.event
+        }, { $push: { "questions": { body: req.body.question, answers: [] } } },
+        (err, q) => {
+
+            if (q) {
+                q.questions.push({ body: req.body.question, answers: [] })
+                return res.status(200).json(q);
+            } else {
+                return res.status(500).json(err);
+            }
+        })
+
+}
+
+exports.getQuestions = (req, res) => {
+
+    let token = req.body.token;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
+
+    if (payload.exp < moment().unix()) {
+        return res.status(401).json({ error: 'El Link ha expirado' })
+    }
+
+    Question.findOne({
+        idEvent: req.body.event
+    }, (err, qs) => {
+
+        if (qs) {
+            return res.status(200).json(qs);
+        } else {
+            return res.status(500).json(err);
+        }
+    })
+
+}
+
+
+exports.makeNews = (req, res) => {
+
+    let token = req.body.token;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
+
+    if (payload.exp < moment().unix()) {
+        return res.status(401).json({ error: 'El Link ha expirado' })
+    }
+    let d = new Date();
+    News.findOneAndUpdate({
+            idEvent: req.body.event
+        }, { $push: { "News": { title: req.body.title, body: req.body.body, createdAt: d } } },
+        (err, n) => {
+            if (n) {
+
+                n.News.push({ title: req.body.title, body: req.body.body, createdAt: d })
+                return res.status(200).json(n);
+            } else {
+                return res.status(500).json(err);
+            }
+        })
+
+}
+
+exports.getNews = (req, res) => {
+
+    let token = req.body.token;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
+
+    if (payload.exp < moment().unix()) {
+        return res.status(401).json({ error: 'El Link ha expirado' })
+    }
+
+    News.findOne({
+        idEvent: req.body.event
+    }, (err, nw) => {
+        if (nw) {
+            return res.status(200).json(nw);
+        } else {
+            return res.status(500).json(err);
+        }
+    })
 
 }

@@ -34,6 +34,7 @@ require('./routes/profileRoute')(app);
 require('./routes/wellnessRoute')(app);
 require('./routes/eventRoute')(app);
 require('./routes/attendeesRoute')(app);
+require('./routes/dashboardRoute')(app);
 
 app.listen(process.env.PORT, () => {
     db.main();
