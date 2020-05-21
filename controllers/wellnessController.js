@@ -3,7 +3,9 @@
 const User = require('../models/User');
 const Wellness = require('../models/Wellness');
 const User_Wellness = require('../models/User_Wellness');
-const Sequelize = require('sequelize');
+const Event_Invitations = require('../models/Invitation');
+const Attend = require('../models/Attendees');
+const sequelize = require('../db/config');
 
 //Encriptador de datos
 const bcrypt = require('bcrypt');
@@ -97,5 +99,63 @@ exports.updateWellness = async(req, res) => {
         });
 
     })
+
+    let myEvents = await Attend.findAll({
+        where: {
+            UserIdUser: id
+        }
+    });
+
+    let query = ('SELECT ' +
+        'w.name ' +
+        'FROM ' +
+        'wellnesses w ' +
+        'JOIN user_wellnesses uw ON ' +
+        'w.idWellness = uw.WellnessIdWellness ' +
+        'JOIN users u ON ' +
+        'uw.UserIdUser = u.idUser ' +
+        'WHERE ' +
+        'w.type = "Alérgenos" AND u.idUser = ' + id);
+
+    let myAlergenics = await sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
+
+    let ma = new Array();
+
+    await myAlergenics.forEach(async(e) => {
+        await ma.push(e['name'])
+    })
+
+    query = ('SELECT ' +
+        'w.name ' +
+        'FROM ' +
+        'wellnesses w ' +
+        'JOIN user_wellnesses uw ON ' +
+        'w.idWellness = uw.WellnessIdWellness ' +
+        'JOIN users u ON ' +
+        'uw.UserIdUser = u.idUser ' +
+        'WHERE ' +
+        'w.type = "Diversidad" AND u.idUser = ' + id);
+
+    let myDiversity = await sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
+
+    let md = new Array();
+
+    await myDiversity.forEach(e => {
+        md.push(e['name'])
+    })
+
+    myEvents.forEach(async(e) => {
+
+        await Event_Invitations.findOneAndUpdate({
+            idEvent: e.dataValues['EventIdEvent'],
+            'invitations.code': e.dataValues['confirmationCode']
+        }, {
+            $set: {
+                'invitations.$.alergenics': ma,
+                'invitations.$.functionality': md
+            }
+        });
+
+    });
 
 }
