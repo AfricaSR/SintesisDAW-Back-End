@@ -4,9 +4,10 @@ const User = require('../models/User');
 const Wellness = require('../models/Wellness');
 const Event = require('../models/Event');
 const Event_Invitations = require('../models/Invitation');
-const Invitation = require('../models/Invitation');
+const Attend = require('../models/Attendees');
 const Question = require('../models/Question')
 const News = require('../models/News')
+const Chat = require('../models/Chat');
 const Sequelize = require('sequelize');
 
 //Encriptador de datos
@@ -117,7 +118,7 @@ exports.eventNonCreated = (req, res) => {
 
 }
 
-exports.createEvent = (req, res) => {
+exports.createEvent = async(req, res) => {
 
     let token = req.body.token;
     let payload = jwt.decode(token, process.env.SECRET_TOKEN)
@@ -134,7 +135,7 @@ exports.createEvent = (req, res) => {
     );
 
 
-    Event.create({
+    await Event.create({
         host: id,
         title: req.body.event.title,
         description: req.body.event.description,
@@ -144,19 +145,33 @@ exports.createEvent = (req, res) => {
         street: req.body.event.street,
         postalCode: req.body.event.postalCode,
         closed: req.body.event.closed,
-    }).then(event => {
-        Event_Invitations.create({
+    }).then(async(event) => {
+        await Event_Invitations.create({
             idEvent: event.idEvent,
             invitations: new Array()
-        })
-        Question.create({
-            idEvent: event.idEvent,
-            questions: new Array()
+        });
+
+        await Attend.create({
+            UserIdUser: id,
+            EventIdEvent: event.idEvent,
+            role: 'Anfitrión',
+            confirmationCode: req.body.event.code,
+            confirmed: true
         })
 
-        News.create({
+        await Question.create({
+            idEvent: event.idEvent,
+            questions: new Array()
+        });
+
+        await News.create({
             idEvent: event.idEvent,
             News: new Array()
+        });
+
+        await Chat.create({
+            idEvent: event.idEvent,
+            chats: new Array()
         })
 
         return res.status(200).json({ msg: "Evento creado correctamente" })

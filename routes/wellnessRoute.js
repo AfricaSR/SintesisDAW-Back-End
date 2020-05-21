@@ -5,4 +5,6 @@ module.exports = function(app) {
     app.get('/wellness/alergenics', Controller.wellnessAList)
     app.get('/wellness/diversity', Controller.wellnessDList)
     app.put('/updateWellness', verifyToken.verifyLogin, Controller.updateWellness)
+    app.post('/updateAlFromEvent', verifyToken.verifyLogin, Controller.updateAlFromEvent)
+    app.post('/updateFuFromEvent', verifyToken.verifyLogin, Controller.updateFuFromEvent)
 }

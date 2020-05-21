@@ -7,6 +7,7 @@ const Event_Invitations = require('../models/Invitation');
 const Invitation = require('../models/Invitation');
 const Attend = require('../models/Attendees');
 const User_Wellness = require('../models/User_Wellness');
+const Chat = require('../models/Chat');
 const Sequelize = require('sequelize');
 
 //Encriptador de datos
@@ -27,7 +28,7 @@ const moment = require('moment');
 //Variables globales
 require('dotenv/config');
 
-exports.createAttend = (req, res) => {
+exports.createAttend = async(req, res) => {
 
     let token = req.body.token;
     let payload = jwt.decode(token, process.env.SECRET_TOKEN)
@@ -37,12 +38,24 @@ exports.createAttend = (req, res) => {
         return res.status(401).json({ error: 'El Link ha expirado' })
     }
 
-    Attend.create({
+    let user = await User.findOne({
+        where: {
+            idUser: id
+        }
+    });
+
+    await Attend.create({
         UserIdUser: id,
         EventIdEvent: req.body.event,
         role: req.body.role,
-        confirmationCode: req.body.confirmationCode
+        confirmationCode: req.body.confirmationCode,
+        confirmed: req.body.confirmed
     }).then(async(attend) => {
+
+        await Chat.findOneAndUpdate({
+            idEvent: req.body.event
+        }, { $push: { "chats": { code: req.body.confirmationCode, messages: [] } } });
+
         await User_Wellness.findAll({
             where: {
                 UserIdUser: id
@@ -73,6 +86,9 @@ exports.createAttend = (req, res) => {
                         'invitations.code': req.body.confirmationCode
                     }, {
                         $set: {
+                            'invitations.$.name': user.name,
+                            'invitations.$.surname': user.surname,
+                            'invitations.$.confirmed': req.body.confirmed,
                             'invitations.$.member': true,
                             'invitations.$.alergenics': al,
                             'invitations.$.functionality': fl

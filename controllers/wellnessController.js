@@ -100,62 +100,114 @@ exports.updateWellness = async(req, res) => {
 
     })
 
-    let myEvents = await Attend.findAll({
+
+    return res.status(200).json({ Felicitaciones: "Tu sección de Bienestar ha sido actualizada." })
+
+}
+
+exports.updateAlFromEvent = async(req, res) => {
+
+    let token = req.body.token;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
+    let id = payload.sub;
+
+    await Attend.findAll({
         where: {
             UserIdUser: id
         }
-    });
+    }).then(async(events) => {
 
-    let query = ('SELECT ' +
-        'w.name ' +
-        'FROM ' +
-        'wellnesses w ' +
-        'JOIN user_wellnesses uw ON ' +
-        'w.idWellness = uw.WellnessIdWellness ' +
-        'JOIN users u ON ' +
-        'uw.UserIdUser = u.idUser ' +
-        'WHERE ' +
-        'w.type = "Alérgenos" AND u.idUser = ' + id);
+        let query = ('SELECT ' +
+            'w.name ' +
+            'FROM ' +
+            'wellnesses w ' +
+            'JOIN user_wellnesses uw ON ' +
+            'w.idWellness = uw.WellnessIdWellness ' +
+            'JOIN users u ON ' +
+            'uw.UserIdUser = u.idUser ' +
+            'WHERE ' +
+            'w.type = "Alérgenos" AND u.idUser = ' + id);
 
-    let myAlergenics = await sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
+        await sequelize.query(query, {
+            type: sequelize.QueryTypes.SELECT
+        }).then(async(alergenics) => {
+            if (alergenics.length > 0 && events.length > 0) {
+                let ma = new Array();
 
-    let ma = new Array();
+                await alergenics.forEach(async(e) => {
+                    await ma.push(e['name'])
+                })
 
-    await myAlergenics.forEach(async(e) => {
-        await ma.push(e['name'])
-    })
+                await events.forEach(async(e) => {
+                    await Event_Invitations.findOneAndUpdate({
+                        idEvent: e.dataValues['EventIdEvent'],
+                        'invitations.code': e.dataValues['confirmationCode']
+                    }, {
+                        $set: {
+                            'invitations.$.alergenics': ma
+                        }
+                    });
 
-    query = ('SELECT ' +
-        'w.name ' +
-        'FROM ' +
-        'wellnesses w ' +
-        'JOIN user_wellnesses uw ON ' +
-        'w.idWellness = uw.WellnessIdWellness ' +
-        'JOIN users u ON ' +
-        'uw.UserIdUser = u.idUser ' +
-        'WHERE ' +
-        'w.type = "Diversidad" AND u.idUser = ' + id);
+                });
 
-    let myDiversity = await sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
-
-    let md = new Array();
-
-    await myDiversity.forEach(e => {
-        md.push(e['name'])
-    })
-
-    myEvents.forEach(async(e) => {
-
-        await Event_Invitations.findOneAndUpdate({
-            idEvent: e.dataValues['EventIdEvent'],
-            'invitations.code': e.dataValues['confirmationCode']
-        }, {
-            $set: {
-                'invitations.$.alergenics': ma,
-                'invitations.$.functionality': md
+                return res.status(200)
             }
         });
 
-    });
+    })
+
+}
+
+exports.updateFuFromEvent = async(req, res) => {
+
+    let token = req.body.token;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
+    let id = payload.sub;
+
+    await Attend.findAll({
+        where: {
+            UserIdUser: id
+        }
+    }).then(async(events) => {
+
+        let query = ('SELECT ' +
+            'w.name ' +
+            'FROM ' +
+            'wellnesses w ' +
+            'JOIN user_wellnesses uw ON ' +
+            'w.idWellness = uw.WellnessIdWellness ' +
+            'JOIN users u ON ' +
+            'uw.UserIdUser = u.idUser ' +
+            'WHERE ' +
+            'w.type = "Diversidad" AND u.idUser = ' + id);
+
+        await sequelize.query(query, {
+            type: sequelize.QueryTypes.SELECT
+        }).then(async(functionality) => {
+            if (functionality.length > 0 && events.length > 0) {
+                let fu = new Array();
+
+                await functionality.forEach(async(e) => {
+                    await fu.push(e['name'])
+                })
+
+                await events.forEach(async(e) => {
+                    await Event_Invitations.findOneAndUpdate({
+                        idEvent: e.dataValues['EventIdEvent'],
+                        'invitations.code': e.dataValues['confirmationCode']
+                    }, {
+                        $set: {
+                            'invitations.$.functionality': fu
+                        }
+                    });
+
+                });
+
+                return res.status(200)
+            }
+        });
+
+    })
+
 
 }
