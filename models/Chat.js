@@ -2,7 +2,6 @@ var mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const Message = new Schema({
-    idAttend: Number,
     role: String,
     name: String,
     surname: String,
@@ -11,7 +10,7 @@ const Message = new Schema({
 })
 
 const Chat = new Schema({
-    code: String,
+    idAttend: Number,
     messages: [Message]
 })
 

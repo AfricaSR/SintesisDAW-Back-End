@@ -105,8 +105,10 @@ exports.getEventsTimeline = async(req, res) => {
         'e.location, ' +
         'e.street, ' +
         'e.postalCode, ' +
+        'u.idUser, ' +
         'u.name, ' +
-        'u.surname ' +
+        'u.surname, ' +
+        'a.idAttend ' +
         'FROM ' +
         'attends a ' +
         'JOIN EVENTS e ON ' +
@@ -114,11 +116,12 @@ exports.getEventsTimeline = async(req, res) => {
         'JOIN users u ON ' +
         'u.idUser = e.host ' +
         'WHERE ' +
-        'e.closed = 0 AND a.confirmed = 1 AND a.UserIdUser = ' + id
+        'e.closed = 0 AND e.host != a.UserIdUser AND ' +
+        'a.confirmed = 1 AND a.UserIdUser = ' + id
 
     );
 
-    //Encontrar aquellos eventos los cuales el invitado ha confirmado su asiatencia
+    //Encontrar aquellos eventos los cuales el invitado ha confirmado su asistencia
     let results = await sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
 
 

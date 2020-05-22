@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const socket = require('socket.io');
 require('dotenv/config');
 
 // Configuracion para acceder a la base de datos en MongoDB
@@ -36,6 +37,10 @@ require('./routes/eventRoute')(app);
 require('./routes/attendeesRoute')(app);
 require('./routes/dashboardRoute')(app);
 
-app.listen(process.env.PORT, () => {
+const server = app.listen(process.env.PORT, () => {
     db.main();
+
 })
+
+require('./routes/chatRoute')(socket, server, app);
+require('./controllers/timerController')(app);
