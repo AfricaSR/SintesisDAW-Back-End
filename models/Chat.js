@@ -11,10 +11,14 @@ const Message = new Schema({
 
 const Chat = new Schema({
     idAttend: Number,
+    nameSurname: String,
+    viewed: Boolean,
+    lastMessage: Date,
     messages: [Message]
 })
 
 module.exports = mongoose.model('Event_Chats', {
     idEvent: Number,
+    idHostAttend: Number,
     chats: [Chat]
 });

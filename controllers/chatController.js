@@ -11,17 +11,22 @@ const moment = require('moment');
 require('dotenv/config');
 
 exports.saveMessage = async(idEvent, idAttend, message) => {
-
-    let messages = await Chat.findOneAndUpdate({
-        idEvent: idEvent,
-        'chats.idAttend': idAttend
-    }, { $push: { 'chats.$.messages': message } }).then(event => {
-
-        event['chats'].find(chat => chat['idAttend'] = idAttend)['messages'].push(message);
-        return event['chats'].find(chat => chat['idAttend'] = idAttend);
-    })
-
-    return messages;
+    return new Promise((resolve, reject) => {
+        Chat.findOneAndUpdate({
+            idEvent: idEvent,
+            'chats.idAttend': idAttend
+        }, { $push: { 'chats.$.messages': message } }, { 'new': true }, (err, event) => {
+            if (err) {
+                reject(err);
+            } else {
+                if (event) {
+                    resolve();
+                } else {
+                    reject('no item found');
+                }
+            }
+        });
+    });
 
 }
 
@@ -31,8 +36,32 @@ exports.getChatMessages = (idEvent, idAttend) => {
         idEvent: idEvent,
         'chats.idAttend': idAttend
     }).then(event => {
-        return event['chats'].find(chat => chat['idAttend'] = idAttend)
-    })
+        return event;
+    }).catch(err => { return err })
+
+    return messages;
+
+}
+
+exports.getChat = (req, res) => {
+
+    Chat.findOne({
+        idEvent: req.body.idEvent,
+        'chats.idAttend': req.body.idAttend
+    }).then(event => {
+        return res.status(200).json(event['chats'].find(chat => chat['idAttend'] == req.body.idAttend))
+    }).catch(err => { return err })
+
+}
+
+exports.viewChatMessages = (idEvent, idAttend, viewed) => {
+
+    let messages = Chat.findOneAndUpdate({
+        idEvent: idEvent,
+        'chats.idAttend': idAttend
+    }, { $set: { 'chats.$.viewed': viewed } }).then(event => {
+        return event;
+    }).catch(err => { return err })
 
     return messages;
 

@@ -44,66 +44,97 @@ exports.createAttend = async(req, res) => {
         }
     });
 
-    await Attend.create({
-        UserIdUser: id,
-        EventIdEvent: req.body.event,
-        role: req.body.role,
-        confirmationCode: req.body.confirmationCode,
-        confirmed: req.body.confirmed
+    let attend = Attend.findOne({
+        where: {
+            confirmationCode: req.body.confirmationCode
+        }
     }).then(async(attend) => {
 
-        await Chat.findOneAndUpdate({
-            idEvent: req.body.event
-        }, { $push: { "chats": { code: req.body.confirmationCode, messages: [] } } });
-
-        await User_Wellness.findAll({
+        let ei = await Attend.findOne({
             where: {
+                EventidEvent: req.body.event,
                 UserIdUser: id
             }
 
-        }).then(async(uw) => {
+        })
 
-            let wl = new Array();
-            uw.forEach(e => {
-                wl.push(e.dataValues.WellnessIdWellness)
-            });
-            let al = new Array();
-            let fl = new Array();
+        if (!attend && !ei) {
+            await Attend.create({
+                UserIdUser: id,
+                EventIdEvent: req.body.event,
+                role: req.body.role,
+                confirmationCode: req.body.confirmationCode,
+                confirmed: req.body.confirmed
+            }).then(async(attend) => {
 
-            await Wellness.findAll()
-                .then(async(wellnessList) => {
-
-                    wellnessList.forEach(e => {
-                        if (wl.includes(e.dataValues.idWellness) && e.dataValues.type == 'Alérgenos') {
-                            al.push(e.name)
-                        } else if (wl.includes(e.dataValues.idWellness) && e.dataValues.type == 'Diversidad') {
-                            fl.push(e.name)
+                await Chat.findOneAndUpdate({
+                    idEvent: req.body.event
+                }, {
+                    $push: {
+                        "chats": {
+                            idAttend: attend.idAttend,
+                            nameSurname: req.body.nameSurname,
+                            viewed: false,
+                            lastMessage: new Date(),
+                            messages: []
                         }
-                    })
+                    }
+                });
 
-                    await Event_Invitations.findOneAndUpdate({
-                        idEvent: req.body.event,
-                        'invitations.code': req.body.confirmationCode
-                    }, {
-                        $set: {
-                            'invitations.$.name': user.name,
-                            'invitations.$.surname': user.surname,
-                            'invitations.$.confirmed': req.body.confirmed,
-                            'invitations.$.member': true,
-                            'invitations.$.alergenics': al,
-                            'invitations.$.functionality': fl
-                        }
+                await User_Wellness.findAll({
+                    where: {
+                        UserIdUser: id
+                    }
+
+                }).then(async(uw) => {
+
+                    let wl = new Array();
+                    uw.forEach(e => {
+                        wl.push(e.dataValues.WellnessIdWellness)
                     });
+                    let al = new Array();
+                    let fl = new Array();
 
-                    return res.status(200).json({ msg: "Bienveni@ al Evento" })
-                })
-                .catch(err => res.json({ error: 'Ha ocurrido un error' }));
+                    await Wellness.findAll()
+                        .then(async(wellnessList) => {
+
+                            wellnessList.forEach(e => {
+                                if (wl.includes(e.dataValues.idWellness) && e.dataValues.type == 'Alérgenos') {
+                                    al.push(e.name)
+                                } else if (wl.includes(e.dataValues.idWellness) && e.dataValues.type == 'Diversidad') {
+                                    fl.push(e.name)
+                                }
+                            })
+
+                            await Event_Invitations.findOneAndUpdate({
+                                idEvent: req.body.event,
+                                'invitations.code': req.body.confirmationCode
+                            }, {
+                                $set: {
+                                    'invitations.$.name': user.name,
+                                    'invitations.$.surname': user.surname,
+                                    'invitations.$.confirmed': req.body.confirmed,
+                                    'invitations.$.member': true,
+                                    'invitations.$.alergenics': al,
+                                    'invitations.$.functionality': fl
+                                }
+                            });
+
+                            return res.status(200).json({ Correcto: "Bienveni@ al Evento" })
+                        })
+                        .catch(err => res.json({ error: 'Ha ocurrido un error' }));
 
 
 
-        }).catch(err => res.json({ error: 'Ha ocurrido un error' }));
+                }).catch(err => res.json({ error: 'Ha ocurrido un error' }));
 
-    }).catch(err => { return res.status(500).json({ error: err }) })
+            }).catch(err => { return res.status(500).json({ error: err }) })
+
+        } else {
+            return res.json({ Error: "La invitación que has introducido no es válida" })
+        }
+    })
+
 
 
 

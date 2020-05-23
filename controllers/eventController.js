@@ -157,6 +157,11 @@ exports.createEvent = async(req, res) => {
             role: 'Anfitrión',
             confirmationCode: req.body.event.code,
             confirmed: true
+        }).then(async(attend) => {
+            await Chat.create({
+                idEvent: event.idEvent,
+                chats: new Array()
+            })
         })
 
         await Question.create({
@@ -169,10 +174,7 @@ exports.createEvent = async(req, res) => {
             News: new Array()
         });
 
-        await Chat.create({
-            idEvent: event.idEvent,
-            chats: new Array()
-        })
+
 
         return res.status(200).json({ msg: "Evento creado correctamente" })
     }).catch(err => { return res.status(500).json({ error: err }) })
@@ -223,6 +225,32 @@ exports.deleteEventInvitation = (req, res) => {
     if (payload.exp < moment().unix()) {
         return res.status(401).json({ error: 'El Link ha expirado' })
     }
+
+    Attend.findOne({
+        where: {
+            confirmationCode: req.body.code
+        }
+    }).then(async(attend) => {
+
+
+        if (attend) {
+            await Chat.findOneAndUpdate({
+                    idEvent: req.body.idEvent,
+                    'chats.idAttend': attend.idAttend
+                }, { $pull: { "chats": { idAttend: attend.idAttend } } },
+                (err, chat) => {
+
+                    Attend.destroy({
+                        where: {
+                            confirmationCode: req.body.code
+                        }
+                    })
+
+                })
+        }
+
+    })
+
 
     Event_Invitations.findOneAndUpdate({
             idEvent: req.body.idEvent
