@@ -188,6 +188,69 @@ exports.editEvent = (req, res) => {
 
 exports.deleteEvent = (req, res) => {
 
+    let token = req.body.token;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
+    let id = payload.sub;
+
+    if (payload.exp < moment().unix()) {
+        return res.status(401).json({ error: 'El Link ha expirado' })
+    }
+
+    //Encontrar todos los asistentes del evento y los borra
+    Attend.destroy({
+        where: {
+            EventidEvent: req.body.idEvent
+        }
+    }).then(async() => {
+        //Habiendo borrado los asistentes, se borran los objetos relacionados con el evento
+        await Event_Invitations.deleteOne({
+            idEvent: req.body.idEvent
+        }, (err, ei) => {
+            if (err) {
+                return res.status(500).json({ error: "Ha ocurrido un error ei" })
+            } else {
+
+            }
+        })
+
+        await Chat.deleteOne({
+            idEvent: req.body.idEvent
+        }, (err, chat) => {
+            if (err) {
+                return res.status(500).json({ error: "Ha ocurrido un error chat" })
+            }
+        })
+
+        await Question.deleteOne({
+            idEvent: req.body.idEvent
+        }, (err, quest) => {
+            if (err) {
+                return res.status(500).json({ error: "Ha ocurrido un error ques" })
+            }
+        })
+
+        await News.deleteOne({
+                idEvent: req.body.idEvent
+            }, (err, news) => {
+                if (err) {
+                    return res.status(500).json({ error: "Ha ocurrido un error new" })
+                }
+            })
+            //Y finalmente el propio evento
+        await Event.destroy({
+            where: {
+                idEvent: req.body.idEvent
+            }
+        }).then(() => {}).catch(err => { if (err) { return res.status(500).json({ error: "Ha ocurrido un error event" }) } })
+
+
+        return res.status(200).json({ msg: "Evento borrado correctamente" })
+
+    }).catch(err => {
+        if (err) {
+            return res.status(500).json({ error: "Ha ocurrido un error attend" })
+        }
+    })
 
 }
 
