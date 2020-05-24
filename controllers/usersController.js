@@ -1,6 +1,7 @@
 'use strict'
 //Importar el model User junto con el módulo que lo controla
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const Sequelize = require('sequelize');
 
 //Encriptador de datos
@@ -83,17 +84,44 @@ exports.verified = (req, res) => {
                 verified: false
             }
         })
-        .then(user => {
+        .then((user) => {
             if (user) {
-                res.status(200).json({ msg: 'Hola ' + user.name + ', ya puedes autenticarte' });
+                //Con el usuario verificado se crea el objeto de las notificaciones
+                Notification.create({
+                    idUser: user.idUser,
+                    user: new Array(),
+                    host: new Array(),
+                    attend: new Array()
+                }, () => {
+
+                    let noti = {
+                        title: 'Te damos la bienvenida',
+                        body: '¿Te apetece actualizar tu seción de bienestar?',
+                        viewed: false,
+                        createdAt: new Date()
+                    }
+
+                    //Y de paso se le añade una notificación de bienvenida
+                    Notification.findOneAndUpdate({
+                            idUser: user.idUser
+                        }, { $push: { 'LVL_User': noti } },
+                        (err) => {
+                            if (err) {
+                                console.log(err)
+                            }
+                        })
+                })
+
                 user.verified = true;
                 user.save()
+                return res.status(200).json({ msg: 'Hola ' + user.name + ', ya puedes autenticarte' });
+
             } else {
-                res.json({ error: 'El usuario no existe' })
+                return res.json({ error: 'El usuario no existe' })
             }
 
         })
-        .catch(err => res.json({ error: 'El usuario no existe' }));
+        .catch(err => { return res.json({ error: 'El usuario no existe' }) });
 
 }
 

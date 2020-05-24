@@ -42,5 +42,5 @@ const server = app.listen(process.env.PORT, () => {
 
 })
 
-require('./routes/chatRoute')(socket, server, app);
+require('./routes/socketRoute')(socket, server, app);
 require('./controllers/timerController')(app);

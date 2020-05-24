@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Attend = require('../models/Attendees');
 const Event = require('../models/Event');
 const Chat = require('../models/Chat');
+const Notification = require('../models/Notification');
 const jwt = require('jwt-simple');
 const moment = require('moment');
 
@@ -76,5 +77,55 @@ exports.getChats = (req, res) => {
             return res.status(200).json(event);
         }
     })
+
+}
+
+exports.getNotifications = (token) => {
+
+    let tok = token;
+    let payload = jwt.decode(tok, process.env.SECRET_TOKEN)
+    let id = payload.sub;
+
+    let notifications = Notification.findOne({
+        idUser: id
+    }).then(noti => {
+        return noti;
+    }).catch(err => { return err })
+
+    return notifications;
+
+}
+
+exports.viewNotifications = async(token) => {
+    let tok = token;
+    let payload = jwt.decode(tok, process.env.SECRET_TOKEN)
+    let id = payload.sub;
+    let notifications = await Notification.findOne({
+        idUser: id
+    }, (err, noti) => {
+        if (noti) {
+            noti['LVL_User'].forEach(e => {
+                e['viewed'] = true;
+            });
+            noti['LVL_Host'].forEach(e => {
+                e['viewed'] = true;
+            });
+            noti['LVL_Attend'].forEach(e => {
+                e['viewed'] = true;
+            });
+            noti.save()
+        }
+
+        return noti;
+    })
+
+    return notifications;
+}
+
+exports.postNotifications = async(idEvent, title) => {
+    /*
+        await Attend.findAll({
+            where
+        })*/
 
 }

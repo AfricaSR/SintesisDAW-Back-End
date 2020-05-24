@@ -8,21 +8,9 @@ const Notification = new Schema({
     createdAt: Date
 })
 
-const LVL_Host = new Schema({
-    notifications: [Notification]
-})
-
-const LVL_User = new Schema({
-    notifications: [Notification]
-})
-
-const LVL_Attend = new Schema({
-    notifications: [Notification]
-})
-
-module.exports = mongoose.model('Notification', {
+module.exports = mongoose.model('User_Notifications', {
     idUser: Number,
-    user: LVL_User,
-    host: LVL_Host,
-    attend: LVL_Attend
+    LVL_Host: [Notification],
+    LVL_User: [Notification],
+    LVL_Attend: [Notification]
 });
