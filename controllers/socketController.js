@@ -130,7 +130,7 @@ exports.postNewsNotification = async(idEvent, title) => {
             role: 'Asistente'
         }
     }).then(async(attends) => {
-        console.log(attends)
+
         if (attends) {
             let noti = {
                 title: title,
@@ -139,7 +139,7 @@ exports.postNewsNotification = async(idEvent, title) => {
                 createdAt: new Date()
             }
             await attends.forEach(e => {
-                console.log(e.dataValues)
+
                 Notification.findOneAndUpdate({
                     idUser: e.dataValues['UserIdUser']
                 }, { $push: { 'LVL_Attend': noti } }, (err) => {
@@ -266,6 +266,10 @@ exports.eventUnavailable = (idEvent) => {
                 idUser: e.dataValues['UserIdUser']
             }, { $push: { 'LVL_Attend': noti } })
         })
+    }).catch(err => {
+        if (err) {
+            return err;
+        }
     })
 
 
@@ -295,6 +299,10 @@ exports.eventNewQuestion = async(idEvent, title) => {
                 idUser: e.dataValues['UserIdUser']
             }, { $push: { 'LVL_Attend': noti } })
         })
+    }).catch(err => {
+        if (err) {
+            return err;
+        }
     })
 
     return notifications;
@@ -303,23 +311,24 @@ exports.eventNewQuestion = async(idEvent, title) => {
 
 exports.postReponses = async(idUser, title, name, surname) => {
 
-    let notifications = await Notification.findOne({
-        idUser: idUser
-    }, (err, n) => {
-        if (err) {
-            return err
-        } else {
-            let noti = {
-                title: name + ' ' + surname,
-                body: 'Te ha dejado una respuesta en tu evento <b style="color: #56baed;">' + title + '</b>',
-                viewed: false,
-                createdAt: new Date()
+    let noti = {
+        title: name + ' ' + surname,
+        body: 'Te ha dejado una respuesta en tu evento <b style="color: #56baed;">' + title + '</b>',
+        viewed: false,
+        createdAt: new Date()
+    }
+
+    let notifications = await Notification.findOneAndUpdate({
+            idUser: idUser
+        }, { $push: { 'LVL_Host': noti } },
+        (err, n) => {
+
+            if (n) {
+
+                return n
             }
-            n['LVL_Host'].push(noti);
-            n.save();
-            return n;
         }
-    })
+    )
 
     return notifications;
 

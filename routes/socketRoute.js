@@ -96,7 +96,7 @@ module.exports = function(socket, server, app) {
     })
 
     app.post('/postReponses', (req, res) => {
-
+        console.log(req.body)
         Controller.postReponses(
             req.body.idUser,
             req.body.title,
