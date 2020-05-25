@@ -92,122 +92,103 @@ exports.updateWellness = async(req, res) => {
         }
     });
 
+    await Attend.findAll({
+        where: {
+            UserIdUser: id
+        }
+    }).then((at) => {
+        at.forEach(async(e) => {
+            await Event_Invitations.findOne({
+                idEvent: e.dataValues['EventIdEvent']
+            }, (err, al) => {
+
+                al['invitations']
+                    .find(x => x['code'] == e.dataValues['confirmationCode'])['alergenics'] = new Array();
+                al['invitations']
+                    .find(x => x['code'] == e.dataValues['confirmationCode'])['functionality'] = new Array();
+
+                al.save();
+
+            })
+        });
+    }).catch(err => {
+        if (err) {
+            return res.json(err)
+        }
+    })
+
+
     await req.body.wellnessList.forEach(e => {
         User_Wellness.create({
-            UserIdUser: id,
-            WellnessIdWellness: e
-        });
+                UserIdUser: id,
+                WellnessIdWellness: e
+            }).then(async(uw) => {
+                await Wellness.findOne({
+                    where: {
+                        idWellness: uw.dataValues['WellnessIdWellness']
+                    }
+                }).then(async(wll) => {
+                    let name = wll.dataValues['name']
+
+                    if (wll.dataValues['type'] == 'Alérgenos') {
+
+                        await Attend.findAll({
+                            where: {
+                                UserIdUser: id
+                            }
+                        }).then((at) => {
+
+                            at.forEach(async(el) => {
+
+                                await Event_Invitations.findOne({
+                                        idEvent: el.dataValues['EventIdEvent'],
+                                    },
+                                    (err, al) => {
+
+                                        al['invitations']
+                                            .find(x => x['code'] == el.dataValues['confirmationCode'])['alergenics'].push(name)
+                                        al.save();
+
+                                    })
+
+                            });
+
+                        })
+
+                    } else {
+
+                        await Attend.findAll({
+                            where: {
+                                UserIdUser: id
+                            }
+                        }).then((at) => {
+
+                            at.forEach(async(el) => {
+
+                                await Event_Invitations.findOne({
+                                        idEvent: el.dataValues['EventIdEvent']
+                                    },
+                                    (err, al) => {
+                                        al['invitations']
+                                            .find(x => x['code'] == el.dataValues['confirmationCode'])['functionality'].push(name)
+                                        al.save();
+                                    })
+
+                            });
+
+                        })
+
+                    }
+                })
+            })
+            .catch(err => {
+                if (err) {
+                    return err
+                }
+            });
 
     })
-
 
     return res.status(200).json({ Felicitaciones: "Tu sección de Bienestar ha sido actualizada." })
-
-}
-
-exports.updateAlFromEvent = async(req, res) => {
-
-    let token = req.body.token;
-    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
-    let id = payload.sub;
-
-    await Attend.findAll({
-        where: {
-            UserIdUser: id
-        }
-    }).then(async(events) => {
-
-        let query = ('SELECT ' +
-            'w.name ' +
-            'FROM ' +
-            'wellnesses w ' +
-            'JOIN user_wellnesses uw ON ' +
-            'w.idWellness = uw.WellnessIdWellness ' +
-            'JOIN users u ON ' +
-            'uw.UserIdUser = u.idUser ' +
-            'WHERE ' +
-            'w.type = "Alérgenos" AND u.idUser = ' + id);
-
-        await sequelize.query(query, {
-            type: sequelize.QueryTypes.SELECT
-        }).then(async(alergenics) => {
-            if (alergenics.length > 0 && events.length > 0) {
-                let ma = new Array();
-
-                await alergenics.forEach(async(e) => {
-                    await ma.push(e['name'])
-                })
-
-                await events.forEach(async(e) => {
-                    await Event_Invitations.findOneAndUpdate({
-                        idEvent: e.dataValues['EventIdEvent'],
-                        'invitations.code': e.dataValues['confirmationCode']
-                    }, {
-                        $set: {
-                            'invitations.$.alergenics': ma
-                        }
-                    });
-
-                });
-
-                return res.status(200)
-            }
-        });
-
-    })
-
-}
-
-exports.updateFuFromEvent = async(req, res) => {
-
-    let token = req.body.token;
-    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
-    let id = payload.sub;
-
-    await Attend.findAll({
-        where: {
-            UserIdUser: id
-        }
-    }).then(async(events) => {
-
-        let query = ('SELECT ' +
-            'w.name ' +
-            'FROM ' +
-            'wellnesses w ' +
-            'JOIN user_wellnesses uw ON ' +
-            'w.idWellness = uw.WellnessIdWellness ' +
-            'JOIN users u ON ' +
-            'uw.UserIdUser = u.idUser ' +
-            'WHERE ' +
-            'w.type = "Diversidad" AND u.idUser = ' + id);
-
-        await sequelize.query(query, {
-            type: sequelize.QueryTypes.SELECT
-        }).then(async(functionality) => {
-            if (functionality.length > 0 && events.length > 0) {
-                let fu = new Array();
-
-                await functionality.forEach(async(e) => {
-                    await fu.push(e['name'])
-                })
-
-                await events.forEach(async(e) => {
-                    await Event_Invitations.findOneAndUpdate({
-                        idEvent: e.dataValues['EventIdEvent'],
-                        'invitations.code': e.dataValues['confirmationCode']
-                    }, {
-                        $set: {
-                            'invitations.$.functionality': fu
-                        }
-                    });
-
-                });
-
-                return res.status(200)
-            }
-        });
-
-    })
-
 
 }

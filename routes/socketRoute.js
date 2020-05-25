@@ -61,7 +61,24 @@ module.exports = function(socket, server, app) {
     })
 
     app.post('/postNews', (req, res) => {
+        Controller.postNewsNotification(req.body.idEvent, req.body.title).then(notifications => {
+            io.sockets.emit('sendNews')
+            return res.status(200).json({ msg: 'ok' })
+        })
+    })
 
+    app.post('/postAttend', (req, res) => {
+        Controller.postAttend(req.body.idEvent, req.body.user).then(notifications => {
+            io.sockets.emit('sendAttends')
+            return res.status(200).json({ msg: 'ok' })
+        })
+    })
+
+    app.post('/postWellness', (req, res) => {
+        Controller.postWellness(req.body.token).then(notifications => {
+            io.sockets.emit('sendWellness')
+            return res.status(200).json({ msg: 'ok' })
+        })
     })
 
 

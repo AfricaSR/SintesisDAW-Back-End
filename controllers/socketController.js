@@ -122,10 +122,127 @@ exports.viewNotifications = async(token) => {
     return notifications;
 }
 
-exports.postNotifications = async(idEvent, title) => {
-    /*
-        await Attend.findAll({
-            where
-        })*/
+exports.postNewsNotification = async(idEvent, title) => {
+
+    let Notifications = await Attend.findAll({
+        where: {
+            EventIdEvent: idEvent,
+            role: {
+                $not: 'Anfitrión'
+            }
+        }
+    }).then(async(attends) => {
+
+        if (attends) {
+            let noti = {
+                title: title,
+                body: 'Tiene una nueva noticia',
+                viewed: false,
+                createdAt: new Date()
+            }
+            await attends.forEach(e => {
+                console.log(e.dataValues)
+                Notification.findOneAndUpdate({
+                    idUser: e.dataValues['UserIdUser']
+                }, { $push: { 'LVL_Attend': noti } }, (err) => {
+                    if (err) {
+                        return err;
+                    }
+                })
+            });
+
+        }
+    }).catch(err => {
+        if (err) {
+            return err;
+        }
+    })
+
+    return Notifications;
+
+}
+
+exports.postAttend = async(idEvent, user) => {
+
+    let notifications = await Event.findOne({
+        where: {
+            idEvent: idEvent
+        }
+    }).then(async(event) => {
+
+        if (event) {
+
+            let noti = {
+                title: (user['name'] + ' ' + user['surname']),
+                body: 'Se ha dado de alta en tu evento <b>' + event.dataValues['title'] + '</b>',
+                viewed: false,
+                createdAt: new Date()
+            }
+            await Notification.findOneAndUpdate({
+                idUser: event.dataValues['host']
+            }, { $push: { 'LVL_Host': noti } })
+        }
+    }).catch(err => {
+        if (err) {
+            return err;
+        }
+    })
+
+    return notifications;
+
+}
+
+/*
+Una vez se haya actualizado la sección de bienestar del usuario,
+Encontrar aquellos eventos de los que el usuario sea asistente y enviar un mensaje
+a los anfitriones del evento para que tengan en cuenta esta información
+*/
+exports.postWellness = async(token) => {
+    let tok = token;
+    let payload = jwt.decode(tok, process.env.SECRET_TOKEN)
+    let id = payload.sub;
+    let notifications = await Attend.findAll({
+        where: {
+            UserIdUser: id
+        }
+    }).then((attends) => {
+
+        if (attends) {
+
+            let noti = {
+                title: 'Uno de tus invitados',
+                body: 'Ha actualizado su información de <b style="color: #56baed;">Bienestar</b>',
+                viewed: false,
+                createdAt: new Date()
+            }
+
+            attends.forEach((e) => {
+                Event.findOne({
+                    where: {
+                        idEvent: e.dataValues['EventIdEvent']
+                    }
+                }).then((host) => {
+
+                    Notification.findOneAndUpdate({
+                            idUser: host.dataValues['host']
+                        }, { $push: { 'LVL_Host': noti } },
+                        (err) => {
+                            if (err) {
+                                return err;
+                            }
+                        })
+
+                })
+
+            })
+
+        }
+    }).catch(err => {
+        if (err) {
+            return err;
+        }
+    })
+
+    return notifications;
 
 }
