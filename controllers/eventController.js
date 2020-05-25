@@ -351,8 +351,7 @@ exports.editEventInvitation = async(req, res) => {
             'invitations.$.confirmed': req.body.invitation.confirmed,
             'invitations.$.member': req.body.invitation.member,
             'invitations.$.alergenics': req.body.invitation.alergenics,
-            'invitations.$.functionality': req.body.invitation.functionality,
-            'invitations.$.responses': req.body.invitation.responses,
+            'invitations.$.functionality': req.body.invitation.functionality
 
         }
     });
@@ -471,6 +470,52 @@ exports.getQuestions = (req, res) => {
             return res.status(500).json(err);
         }
     })
+
+}
+
+exports.getResponses = async(req, res) => {
+
+    let token = req.body.token;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
+    let id = payload.sub;
+
+    await Attend.findOne({
+        where: {
+            UserIdUser: id,
+            EventIdEvent: req.body.event
+        }
+    }).then(async(attend) => {
+
+        let qs = new Array();
+        //Encuentra todas las preguntas del evento con sus respuestas
+        await Question.findOne({
+            idEvent: attend.dataValues['EventIdEvent']
+        }, (err, q) => {
+
+            q['questions'].forEach(e => {
+
+                let qr = {
+                    question: e['body'],
+                    answer: e['answers'].find(x => x.idAttend == attend.dataValues['idAttend'])
+                }
+
+                if (qr['answer'] == undefined) {
+                    qr['answer'] = '';
+                }
+                qs.push(qr)
+            });
+            return res.json(qs);
+        })
+
+    }).catch(err => {
+        if (err) {
+            return res.json(err);
+        }
+    })
+
+
+
+
 
 }
 

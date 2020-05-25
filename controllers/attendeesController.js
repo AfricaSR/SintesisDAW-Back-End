@@ -2,24 +2,12 @@
 //Importar el model User junto con el módulo que lo controla
 const User = require('../models/User');
 const Wellness = require('../models/Wellness');
-const Event = require('../models/Event');
 const Event_Invitations = require('../models/Invitation');
-const Invitation = require('../models/Invitation');
 const Attend = require('../models/Attendees');
 const User_Wellness = require('../models/User_Wellness');
 const Chat = require('../models/Chat');
-const Sequelize = require('sequelize');
+const Question = require('../models/Question');
 
-//Encriptador de datos
-const bcrypt = require('bcrypt');
-var crypto = require("crypto");
-//const _ = require('lodash');
-
-//Envío de mails
-const nodemailer = require("nodemailer");
-
-//Servicio de autenticación de usuarios
-const serv = require('../services/auth');
 
 //Servicio de tokens con caducidad
 const jwt = require('jwt-simple');
@@ -135,6 +123,35 @@ exports.createAttend = async(req, res) => {
         }
     })
 
+
+
+
+}
+
+exports.sendResponses = async(req, res) => {
+
+    await Question.findOne({
+        idEvent: req.body.idEvent
+    }, async(err, q) => {
+        if (q) {
+
+            req.body.answers.forEach(e => {
+                let resp = {
+                    idAttend: e.idAttend,
+                    name: e.name,
+                    surname: e.surname,
+                    answer: e.answer,
+                }
+                q['questions'].find(x => x.body == e.question)['answers'].push(resp)
+            })
+
+            await q.save();
+            return res.status(200).json(q)
+        } else {
+            return res.status(500).json(err)
+        }
+
+    })
 
 
 

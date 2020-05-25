@@ -8,8 +8,7 @@ const Invitation = new Schema({
     confirmed: Boolean,
     member: Boolean,
     alergenics: [String],
-    functionality: [String],
-    Responses: [String]
+    functionality: [String]
 })
 
 module.exports = mongoose.model('Event_Invitations', {

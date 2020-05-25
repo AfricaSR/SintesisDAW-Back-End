@@ -95,8 +95,8 @@ exports.verified = (req, res) => {
                 }, () => {
 
                     let noti = {
-                        title: 'Te damos la bienvenida',
-                        body: '¿Te apetece actualizar tu seción de bienestar?',
+                        title: '¡Te damos la bienvenida a Evenfy!',
+                        body: '¿Te apetece actualizar tu sección de bienestar?',
                         viewed: false,
                         createdAt: new Date()
                     }

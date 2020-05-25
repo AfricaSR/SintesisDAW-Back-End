@@ -81,5 +81,31 @@ module.exports = function(socket, server, app) {
         })
     })
 
+    app.post('/eventUnavailable', (req, res) => {
+        Controller.eventUnavailable(req.body.idEvent).then(notifications => {
+            io.sockets.emit('sendUnavailable')
+            return res.status(200).json({ msg: 'ok' })
+        })
+    })
+
+    app.post('/eventNewQuestion', (req, res) => {
+        Controller.eventNewQuestion(req.body.idEvent, req.body.title).then(notifications => {
+            io.sockets.emit('sendNewQuestions')
+            return res.status(200).json({ msg: 'ok' })
+        })
+    })
+
+    app.post('/postReponses', (req, res) => {
+
+        Controller.postReponses(
+            req.body.idUser,
+            req.body.title,
+            req.body.name,
+            req.body.surname).then(notifications => {
+            io.sockets.emit('sendResponses')
+            return res.status(200).json({ msg: 'ok' })
+        })
+    })
+
 
 }

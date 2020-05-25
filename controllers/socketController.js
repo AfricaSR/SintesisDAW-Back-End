@@ -124,15 +124,13 @@ exports.viewNotifications = async(token) => {
 
 exports.postNewsNotification = async(idEvent, title) => {
 
-    let Notifications = await Attend.findAll({
+    let notifications = await Attend.findAll({
         where: {
             EventIdEvent: idEvent,
-            role: {
-                $not: 'Anfitrión'
-            }
+            role: 'Asistente'
         }
     }).then(async(attends) => {
-
+        console.log(attends)
         if (attends) {
             let noti = {
                 title: title,
@@ -158,7 +156,7 @@ exports.postNewsNotification = async(idEvent, title) => {
         }
     })
 
-    return Notifications;
+    return notifications;
 
 }
 
@@ -240,6 +238,86 @@ exports.postWellness = async(token) => {
     }).catch(err => {
         if (err) {
             return err;
+        }
+    })
+
+    return notifications;
+
+}
+
+
+exports.eventUnavailable = (idEvent) => {
+
+    let notifications = Attend.findAll({
+        where: {
+            EventIdEvent: idEvent
+        }
+    }).then((attends) => {
+
+        let noti = {
+            title: 'Uno de tus Eventos',
+            body: 'Ha sido <b style="color: #56baed;">Cerrado</b>',
+            viewed: false,
+            createdAt: new Date()
+        }
+        attends.forEach(async(e) => {
+
+            await Notification.findOneAndUpdate({
+                idUser: e.dataValues['UserIdUser']
+            }, { $push: { 'LVL_Attend': noti } })
+        })
+    })
+
+
+
+    return notifications;
+
+}
+
+exports.eventNewQuestion = async(idEvent, title) => {
+
+    let notifications = await Attend.findAll({
+        where: {
+            EventIdEvent: idEvent,
+            role: 'Asistente'
+        }
+    }).then((attends) => {
+
+        let noti = {
+            title: 'El evento ' + title,
+            body: 'Tiene una nueva <b style="color: #56baed;">Pregunta sin responser</b>',
+            viewed: false,
+            createdAt: new Date()
+        }
+        attends.forEach(async(e) => {
+
+            await Notification.findOneAndUpdate({
+                idUser: e.dataValues['UserIdUser']
+            }, { $push: { 'LVL_Attend': noti } })
+        })
+    })
+
+    return notifications;
+
+}
+
+exports.postReponses = async(idUser, title, name, surname) => {
+
+    let notifications = await Notification.findOne({
+        idUser: idUser
+    }, (err, n) => {
+        if (err) {
+            return err
+        } else {
+            let noti = {
+                title: name + ' ' + surname,
+                body: 'Te ha dejado una respuesta en tu evento <b style="color: #56baed;">' + title + '</b>',
+                viewed: false,
+                createdAt: new Date()
+            }
+            n['LVL_Host'].push(noti);
+            n.save();
+            return n;
         }
     })
 
