@@ -181,7 +181,34 @@ exports.createEvent = async(req, res) => {
 
 }
 
-exports.editEvent = (req, res) => {
+exports.editEvent = async(req, res) => {
+
+    let token = req.body.token;
+    let payload = jwt.decode(token, process.env.SECRET_TOKEN)
+
+    if (payload.exp < moment().unix()) {
+        return res.status(401).json({ error: 'El Link ha expirado' })
+    }
+
+
+    let event = await Event.findOne({
+            where: {
+                idEvent: req.body.event.idEvent
+            }
+        }).then(event => {
+            return event.update({
+                title: req.body.event.title,
+                description: req.body.event.description,
+                date: req.body.event.date,
+                location: req.body.event.location,
+                street: req.body.event.street,
+                postalCode: req.body.event.postalCode
+            })
+        })
+        .catch(err => { if (err) return err })
+
+    return res.status(200).json(event);
+
 
 
 }

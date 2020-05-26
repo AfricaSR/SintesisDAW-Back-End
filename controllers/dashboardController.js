@@ -116,14 +116,13 @@ exports.getEventsTimeline = async(req, res) => {
         'JOIN users u ON ' +
         'u.idUser = e.host ' +
         'WHERE ' +
-        'e.closed = 0 AND e.host != a.UserIdUser AND ' +
+        'e.closed = 0 AND ' +
         'a.confirmed = 1 AND a.UserIdUser = ' + id
 
     );
 
     //Encontrar aquellos eventos los cuales el invitado ha confirmado su asistencia
     let results = await sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
-
 
     if (results) {
         return res.status(200).send(results);

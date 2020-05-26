@@ -96,13 +96,19 @@ module.exports = function(socket, server, app) {
     })
 
     app.post('/postReponses', (req, res) => {
-        console.log(req.body)
         Controller.postReponses(
             req.body.idUser,
             req.body.title,
             req.body.name,
             req.body.surname).then(notifications => {
             io.sockets.emit('sendResponses')
+            return res.status(200).json({ msg: 'ok' })
+        })
+    })
+
+    app.post('/postEditEvent', (req, res) => {
+        Controller.postEditEvent(req.body.idEvent, req.body.title).then(notifications => {
+            io.sockets.emit('sendEditEvent')
             return res.status(200).json({ msg: 'ok' })
         })
     })

@@ -13,7 +13,7 @@ module.exports = function(app) {
     app.post('/eventNonCreated', verifyToken.verifyLogin, Controller.eventNonCreated)
     app.get('/myInvitation/:id', verifyToken.verifyLogin, Controller.myInvitation)
     app.post('/createEvent', verifyToken.verifyLogin, Controller.createEvent)
-    app.put('/editEvent/:id', verifyToken.verifyLogin, Controller.editEvent)
+    app.post('/editEvent', verifyToken.verifyLogin, Controller.editEvent)
     app.post('/deleteEvent', verifyToken.verifyLogin, Controller.deleteEvent)
     app.post('/makeQuestion', verifyToken.verifyLogin, Controller.makeQuestion)
     app.post('/getResponses', verifyToken.verifyLogin, Controller.getResponses)

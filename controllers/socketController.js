@@ -333,3 +333,35 @@ exports.postReponses = async(idUser, title, name, surname) => {
     return notifications;
 
 }
+
+exports.postEditEvent = async(idEvent, title) => {
+
+    let notifications = await Attend.findAll({
+        where: {
+            EventIdEvent: idEvent,
+            role: 'Asistente'
+        }
+    }).then((attends) => {
+
+        let noti = {
+            title: 'El evento ' + title,
+            body: 'Ha sido <b style="color: #56baed;">Modificado</b>',
+            viewed: false,
+            createdAt: new Date()
+        }
+        attends.forEach(async(e) => {
+
+            await Notification.findOneAndUpdate({
+                idUser: e.dataValues['UserIdUser']
+            }, { $push: { 'LVL_Attend': noti } })
+        })
+    }).catch(err => {
+        if (err) {
+            return err;
+        }
+    })
+
+    return notifications;
+
+
+}
