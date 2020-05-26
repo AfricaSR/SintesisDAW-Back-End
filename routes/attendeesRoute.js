@@ -5,4 +5,5 @@ module.exports = function(app) {
     app.post('/createAttend', verifyToken.verifyLogin, Controller.createAttend)
     app.post('/sendResponses', verifyToken.verifyLogin, Controller.sendResponses)
 
+
 }

@@ -40,7 +40,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const uploader = multer({ storage: storage }); //Se guardara la imagen en el servidor
 app.use(express.static(path.join(__dirname, '/public'))); //Directorio para archivos staticos
 app.use('/uploads', express.static(path.join(__dirname, '/uploads'))); //Directorio de imagenes
-
+app.use('/EvenfyLe', express.static(path.join(__dirname, '/EvenfyLe'))); //Directorio del programa de Escritorio
 
 require('./routes/signInRoute')(app);
 require('./routes/signUpRoute')(app);
