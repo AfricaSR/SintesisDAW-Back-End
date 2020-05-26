@@ -5,14 +5,7 @@ const Sequelize = require('sequelize');
 
 //Encriptador de datos
 const bcrypt = require('bcrypt');
-var crypto = require("crypto");
-//const _ = require('lodash');
 
-//Envío de mails
-const nodemailer = require("nodemailer");
-
-//Servicio de autenticación de usuarios
-const serv = require('../services/auth');
 
 //Servicio de tokens con caducidad
 const jwt = require('jwt-simple');
@@ -71,6 +64,27 @@ exports.editUser = (req, res) => {
         })
         .catch(err => res.json({ error: 'Ha ocurrido un error' }));
 }
+
+exports.addPicture = (req, res) => {
+
+    let idUser = req.file.originalname.split('.')[0];
+    User.update({
+            photo: 'http://localhost:3000/uploads/' + req.file.originalname
+        }, {
+            where: {
+                idUser: idUser
+            }
+        }).then(user => {
+            return res.status(200).send(user);
+        })
+        .catch(err => res.json({ error: 'Ha ocurrido un error' }));
+
+
+
+}
+
+
+
 
 exports.editPassword = async(req, res) => {
 
