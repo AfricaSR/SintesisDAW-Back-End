@@ -591,3 +591,50 @@ exports.getNews = (req, res) => {
     })
 
 }
+
+
+exports.dropQuestion = (req, res) => {
+
+    Question.findOneAndUpdate({
+        idEvent: req.body.idEvent,
+        "questions._id": req.body._id
+    }, {
+        $pull: {
+            "questions": {
+                _id: req.body._id
+            }
+        }
+    }, {
+        upsert: false,
+        new: true
+    }, function(err, q) {
+        if (q) {
+            return res.status(200).json(q)
+        }
+
+    })
+
+}
+
+exports.dropNews = (req, res) => {
+
+    News.findOneAndUpdate({
+        idEvent: req.body.idEvent,
+        "News._id": req.body._id
+    }, {
+        $pull: {
+            "News": {
+                _id: req.body._id
+            }
+        }
+    }, {
+        upsert: false,
+        new: true
+    }, function(err, n) {
+        if (n) {
+            return res.status(200).json(n)
+        }
+
+    })
+
+}
