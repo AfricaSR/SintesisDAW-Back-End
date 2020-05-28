@@ -54,7 +54,6 @@ require('./routes/dashboardRoute')(app);
 
 const server = app.listen(process.env.PORT, () => {
     db.main();
-
 })
 
 require('./routes/socketRoute')(socket, server, app);

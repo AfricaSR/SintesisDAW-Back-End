@@ -1,14 +1,8 @@
 'use strict'
-//Importar el model User junto con el módulo que lo controla
-const User = require('../models/User');
-const Wellness = require('../models/Wellness');
-const Event = require('../models/Event');
-const Event_Invitations = require('../models/Invitation');
-const Invitation = require('../models/Invitation');
-const Question = require('../models/Question');
+
 const News = require('../models/News');
-const Attend = require('../models/Attendees');
 const sequelize = require('../db/config');
+
 //Servicio de tokens con caducidad
 const jwt = require('jwt-simple');
 const moment = require('moment');

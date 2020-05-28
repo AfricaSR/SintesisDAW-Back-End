@@ -94,7 +94,8 @@ exports.updateWellness = async(req, res) => {
 
     await Attend.findAll({
         where: {
-            UserIdUser: id
+            UserIdUser: id,
+            role: 'Asistente'
         }
     }).then((at) => {
         at.forEach(async(e) => {

@@ -8,10 +8,10 @@ module.exports = function(app) {
     app.post('/getEventInvitation', verifyToken.verifyLogin, Controller.getEventInvitation)
     app.post('/deleteEventInvitation', verifyToken.verifyLogin, Controller.deleteEventInvitation)
     app.post('/editEventInvitation', verifyToken.verifyLogin, Controller.editEventInvitation)
-    app.get('/myInvitations', verifyToken.verifyLogin, Controller.myInvitations)
+
     app.post('/eventCreated', verifyToken.verifyLogin, Controller.eventCreated)
     app.post('/eventNonCreated', verifyToken.verifyLogin, Controller.eventNonCreated)
-    app.get('/myInvitation/:id', verifyToken.verifyLogin, Controller.myInvitation)
+
     app.post('/createEvent', verifyToken.verifyLogin, Controller.createEvent)
     app.post('/editEvent', verifyToken.verifyLogin, Controller.editEvent)
     app.post('/deleteEvent', verifyToken.verifyLogin, Controller.deleteEvent)

@@ -1,25 +1,11 @@
 'use strict'
 //Importar el model User junto con el módulo que lo controla
-const User = require('../models/User');
-const Wellness = require('../models/Wellness');
 const Event = require('../models/Event');
 const Event_Invitations = require('../models/Invitation');
 const Attend = require('../models/Attendees');
 const Question = require('../models/Question')
 const News = require('../models/News')
 const Chat = require('../models/Chat');
-const Sequelize = require('sequelize');
-
-//Encriptador de datos
-const bcrypt = require('bcrypt');
-var crypto = require("crypto");
-//const _ = require('lodash');
-
-//Envío de mails
-const nodemailer = require("nodemailer");
-
-//Servicio de autenticación de usuarios
-const serv = require('../services/auth');
 
 //Servicio de tokens con caducidad
 const jwt = require('jwt-simple');
@@ -51,18 +37,8 @@ exports.eventListCreated = (req, res) => {
 
 }
 
-exports.myInvitations = (req, res) => {
 
-    res.status(200).json({ token: req.body.token })
-
-}
-
-exports.myInvitation = (req, res) => {
-
-        res.status(200).json({ token: req.body.token })
-
-    }
-    //Accede a los eventos propidos que se han generado como usuario
+//Accede a los eventos propidos que se han generado como usuario
 exports.eventCreated = (req, res) => {
 
     let token = req.body.token;
