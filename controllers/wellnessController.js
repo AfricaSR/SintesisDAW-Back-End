@@ -145,11 +145,11 @@ exports.updateWellness = async(req, res) => {
                                         idEvent: el.dataValues['EventIdEvent'],
                                     },
                                     (err, al) => {
-
-                                        al['invitations']
-                                            .find(x => x['code'] == el.dataValues['confirmationCode'])['alergenics'].push(name)
-                                        al.save();
-
+                                        if (al['invitations'].find(x => x['code'] == el.dataValues['confirmationCode']) != undefined) {
+                                            al['invitations']
+                                                .find(x => x['code'] == el.dataValues['confirmationCode'])['alergenics'].push(name)
+                                            al.save();
+                                        }
                                     })
 
                             });
@@ -170,9 +170,11 @@ exports.updateWellness = async(req, res) => {
                                         idEvent: el.dataValues['EventIdEvent']
                                     },
                                     (err, al) => {
-                                        al['invitations']
-                                            .find(x => x['code'] == el.dataValues['confirmationCode'])['functionality'].push(name)
-                                        al.save();
+                                        if (al['invitations'].find(x => x['code'] == el.dataValues['confirmationCode']) != undefined) {
+                                            al['invitations']
+                                                .find(x => x['code'] == el.dataValues['confirmationCode'])['functionality'].push(name)
+                                            al.save();
+                                        }
                                     })
 
                             });
